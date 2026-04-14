@@ -28,6 +28,9 @@ const routes: Routes = [
   },
   { path: 'books', loadChildren: () => import('./book/book.module').then(m => m.BookModule) },
   { path: 'authors', loadChildren: () => import('./author/author.module').then(m => m.AuthorModule) },
+  { path: 'accounts', loadChildren: () => import('./account/account.module').then(m => m.AccountModule) },
+  { path: 'pets', loadChildren: () => import('./pet/pet.module').then(m => m.PetModule) },
+  { path: 'upload-files', loadChildren: () => import('./upload-file/upload-file.module').then(m => m.UploadFileModule) },
 ];
 
 @NgModule({

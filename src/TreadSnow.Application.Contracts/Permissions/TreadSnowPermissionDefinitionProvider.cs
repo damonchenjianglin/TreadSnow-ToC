@@ -20,8 +20,20 @@ public class TreadSnowPermissionDefinitionProvider : PermissionDefinitionProvide
         authorsPermission.AddChild(TreadSnowPermissions.Authors.Create, L("Permission:Authors.Create"));
         authorsPermission.AddChild(TreadSnowPermissions.Authors.Edit, L("Permission:Authors.Edit"));
         authorsPermission.AddChild(TreadSnowPermissions.Authors.Delete, L("Permission:Authors.Delete"));
-        //Define your own permissions here. Example:
-        //myGroup.AddPermission(TreadSnowPermissions.MyPermission1, L("Permission:MyPermission1"));
+        var accountsPermission = myGroup.AddPermission(TreadSnowPermissions.Accounts.Default, L("Permission:Accounts"));
+        accountsPermission.AddChild(TreadSnowPermissions.Accounts.Create, L("Permission:Accounts.Create"));
+        accountsPermission.AddChild(TreadSnowPermissions.Accounts.Edit, L("Permission:Accounts.Edit"));
+        accountsPermission.AddChild(TreadSnowPermissions.Accounts.Delete, L("Permission:Accounts.Delete"));
+
+        var petsPermission = myGroup.AddPermission(TreadSnowPermissions.Pets.Default, L("Permission:Pets"));
+        petsPermission.AddChild(TreadSnowPermissions.Pets.Create, L("Permission:Pets.Create"));
+        petsPermission.AddChild(TreadSnowPermissions.Pets.Edit, L("Permission:Pets.Edit"));
+        petsPermission.AddChild(TreadSnowPermissions.Pets.Delete, L("Permission:Pets.Delete"));
+
+        var uploadFilesPermission = myGroup.AddPermission(TreadSnowPermissions.UploadFiles.Default, L("Permission:UploadFiles"));
+        uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Create, L("Permission:UploadFiles.Create"));
+        uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Edit, L("Permission:UploadFiles.Edit"));
+        uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Delete, L("Permission:UploadFiles.Delete"));
     }
 
     private static LocalizableString L(string name)

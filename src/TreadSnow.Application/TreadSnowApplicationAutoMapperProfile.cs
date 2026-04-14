@@ -21,17 +21,18 @@ public class TreadSnowApplicationAutoMapperProfile : Profile
 
         CreateMap<Author, AuthorLookupDto>();
 
-        //ÓÃ»§
+        //ï¿½Ã»ï¿½
         CreateMap<Account, AccountDto>();
         CreateMap<CreateAccountDto, Account>();
         CreateMap<UpdateAccountDto, Account>();
 
-        // ³èÎï
+        // å® ç‰©
         CreateMap<Pet, PetDto>();
         CreateMap<CreatePetDto, Pet>();
         CreateMap<UpdatePetDto, Pet>();
+        CreateMap<Account, AccountLookupDto>();
 
-        // ¸½¼þ
+        // ï¿½ï¿½ï¿½ï¿½
         CreateMap<UploadFile, UploadFileDto>();
         CreateMap<CreateUploadFileDto, UploadFile>();
         CreateMap<UpdateUploadFileDto, UploadFile>();

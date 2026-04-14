@@ -1,12 +1,12 @@
-<!-- 图书列表页面 -->
+<!-- 附件列表页面 -->
 <nz-card [nzTitle]="cardTitle">
   <!-- 卡片标题模板：新增按钮靠左 -->
   <ng-template #cardTitle>
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <!-- 新增按钮 -->
-        <button *abpPermission="'TreadSnow.Books.Create'" nz-button nzType="primary" style="border-radius: 6px;" (click)="createBook()">
-          <span>{{ '::NewBook' | abpLocalization }}</span>
+        <button *abpPermission="'TreadSnow.UploadFiles.Create'" nz-button nzType="primary" style="border-radius: 6px;" (click)="createUploadFile()">
+          <span>{{ '::NewUploadFile' | abpLocalization }}</span>
         </button>
         <!-- 导出按钮组 -->
         <nz-button-group>
@@ -39,13 +39,13 @@
     </div>
   </ng-template>
 
-  <!-- 图书数据表格 -->
+  <!-- 附件数据表格 -->
   <nz-table
-    #bookTable
+    #uploadFileTable
     nzShowPagination
     nzShowSizeChanger
-    [nzData]="book.items"
-    [nzTotal]="book.totalCount"
+    [nzData]="uploadFile.items"
+    [nzTotal]="uploadFile.totalCount"
     [nzPageSize]="list.maxResultCount"
     [nzPageIndex]="currentPage"
     [nzFrontPagination]="false"
@@ -56,27 +56,27 @@
     <thead>
       <tr>
         <th nzShowSort [nzSortFn]="sortByName">{{ '::Name' | abpLocalization }}</th>
-        <th nzShowSort nzShowFilter [nzSortFn]="sortByAuthor" [nzFilters]="authorFilters" [nzFilterFn]="authorFilterFn">{{ '::authorName' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByType">{{ '::Type' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByDate">{{ '::PublishDate' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByPrice">{{ '::Price' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByEntityName">{{ '::EntityName' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByRecordId">{{ '::RecordId' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByType">{{ '::FileType' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByPath">{{ '::FilePath' | abpLocalization }}</th>
         <th nzWidth="120px">{{ '::Actions' | abpLocalization }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of bookTable.data">
-        <!-- 图书名称 -->
+      <tr *ngFor="let row of uploadFileTable.data">
+        <!-- 文件名称 -->
         <td>{{ row.name }}</td>
-        <!-- 作者名称 -->
-        <td>{{ row.authorName }}</td>
-        <!-- 图书类型（本地化显示） -->
+        <!-- 实体名称 -->
+        <td>{{ row.entityName }}</td>
+        <!-- 记录ID -->
+        <td>{{ row.recordId }}</td>
+        <!-- 文件类型 -->
         <td>
-          <nz-tag [nzColor]="'blue'">{{ '::Enum:BookType.' + row.type | abpLocalization }}</nz-tag>
+          <nz-tag [nzColor]="'blue'">{{ row.type }}</nz-tag>
         </td>
-        <!-- 出版日期 -->
-        <td>{{ row.publishDate | date }}</td>
-        <!-- 价格 -->
-        <td>{{ row.price | currency }}</td>
+        <!-- 文件路径 -->
+        <td>{{ row.path }}</td>
         <!-- 操作列：hover触发编辑和删除下拉菜单 -->
         <td>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
@@ -86,11 +86,11 @@
           </a>
           <nz-dropdown-menu #actionMenu="nzDropdownMenu">
             <ul nz-menu>
-              <li *abpPermission="'TreadSnow.Books.Edit'" nz-menu-item (click)="editBook(row.id)">
+              <li *abpPermission="'TreadSnow.UploadFiles.Edit'" nz-menu-item (click)="editUploadFile(row.id)">
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
                 {{ '::Edit' | abpLocalization }}
               </li>
-              <li *abpPermission="'TreadSnow.Books.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
+              <li *abpPermission="'TreadSnow.UploadFiles.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
                 <span nz-icon nzType="delete" nzTheme="outline"></span>
                 {{ '::Delete' | abpLocalization }}
               </li>
@@ -102,10 +102,10 @@
   </nz-table>
 </nz-card>
 
-<!-- 新增/编辑图书弹窗 -->
+<!-- 新增/编辑附件弹窗 -->
 <nz-modal
   [(nzVisible)]="isModalOpen"
-  [nzTitle]="(selectedBook.id ? '::Edit' : '::NewBook') | abpLocalization"
+  [nzTitle]="(selectedUploadFile.id ? '::Edit' : '::NewUploadFile') | abpLocalization"
   [nzOkText]="'::Save' | abpLocalization"
   [nzCancelText]="'::Close' | abpLocalization"
   [nzOkDisabled]="form?.invalid"
@@ -118,35 +118,35 @@
       <div nz-row [nzGutter]="16">
         <!-- 左列 -->
         <div nz-col [nzSpan]="12">
-          <!-- 图书名称输入框 -->
+          <!-- 文件名称输入框 -->
           <nz-form-item>
-            <nz-form-label nzRequired nzFor="book-name">{{ '::Name' | abpLocalization }}</nz-form-label>
+            <nz-form-label nzRequired nzFor="upload-file-name">{{ '::Name' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="nameErrorTpl">
-              <input nz-input id="book-name" formControlName="name" />
+              <input nz-input id="upload-file-name" formControlName="name" />
               <ng-template #nameErrorTpl let-control>
                 <ng-container *ngIf="control.hasError('required')">{{ '::Name' | abpLocalization }} is required</ng-container>
               </ng-template>
             </nz-form-control>
           </nz-form-item>
 
-          <!-- 价格输入框 -->
+          <!-- 实体名称输入框 -->
           <nz-form-item>
-            <nz-form-label nzRequired nzFor="book-price">{{ '::Price' | abpLocalization }}</nz-form-label>
-            <nz-form-control [nzErrorTip]="priceErrorTpl">
-              <input nz-input id="book-price" type="number" formControlName="price" />
-              <ng-template #priceErrorTpl let-control>
-                <ng-container *ngIf="control.hasError('required')">Price is required</ng-container>
+            <nz-form-label nzRequired nzFor="upload-file-entity-name">{{ '::EntityName' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="entityNameErrorTpl">
+              <input nz-input id="upload-file-entity-name" formControlName="entityName" />
+              <ng-template #entityNameErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">{{ '::EntityName' | abpLocalization }} is required</ng-container>
               </ng-template>
             </nz-form-control>
           </nz-form-item>
 
-          <!-- 出版日期选择器 -->
+          <!-- 记录ID输入框 -->
           <nz-form-item>
-            <nz-form-label nzRequired>{{ '::PublishDate' | abpLocalization }}</nz-form-label>
-            <nz-form-control [nzErrorTip]="dateErrorTpl">
-              <nz-date-picker formControlName="publishDate" style="width: 100%;"></nz-date-picker>
-              <ng-template #dateErrorTpl let-control>
-                <ng-container *ngIf="control.hasError('required')">Publish date is required</ng-container>
+            <nz-form-label nzRequired nzFor="upload-file-record-id">{{ '::RecordId' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="recordIdErrorTpl">
+              <input nz-input id="upload-file-record-id" formControlName="recordId" />
+              <ng-template #recordIdErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">{{ '::RecordId' | abpLocalization }} is required</ng-container>
               </ng-template>
             </nz-form-control>
           </nz-form-item>
@@ -154,28 +154,24 @@
 
         <!-- 右列 -->
         <div nz-col [nzSpan]="12">
-          <!-- 作者下拉选择框 -->
+          <!-- 文件类型输入框 -->
           <nz-form-item>
-            <nz-form-label nzRequired nzFor="book-author">{{ '::Author' | abpLocalization }}</nz-form-label>
-            <nz-form-control [nzErrorTip]="authorErrorTpl">
-              <nz-select id="book-author" formControlName="authorId" nzPlaceHolder="Select an author" nzShowSearch>
-                <nz-option *ngFor="let author of authors" [nzValue]="author.id" [nzLabel]="author.name"></nz-option>
-              </nz-select>
-              <ng-template #authorErrorTpl let-control>
-                <ng-container *ngIf="control.hasError('required')">Author is required</ng-container>
+            <nz-form-label nzRequired nzFor="upload-file-type">{{ '::FileType' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="typeErrorTpl">
+              <input nz-input id="upload-file-type" formControlName="type" />
+              <ng-template #typeErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">{{ '::FileType' | abpLocalization }} is required</ng-container>
               </ng-template>
             </nz-form-control>
           </nz-form-item>
 
-          <!-- 图书类型下拉选择框 -->
+          <!-- 文件路径输入框 -->
           <nz-form-item>
-            <nz-form-label nzRequired nzFor="book-type">{{ '::Type' | abpLocalization }}</nz-form-label>
-            <nz-form-control [nzErrorTip]="typeErrorTpl">
-              <nz-select id="book-type" formControlName="type" nzPlaceHolder="Select a book type">
-                <nz-option *ngFor="let type of bookTypes" [nzValue]="type.value" [nzLabel]="'::Enum:BookType.' + type.value | abpLocalization"></nz-option>
-              </nz-select>
-              <ng-template #typeErrorTpl let-control>
-                <ng-container *ngIf="control.hasError('required')">Type is required</ng-container>
+            <nz-form-label nzRequired nzFor="upload-file-path">{{ '::FilePath' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="pathErrorTpl">
+              <input nz-input id="upload-file-path" formControlName="path" />
+              <ng-template #pathErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">{{ '::FilePath' | abpLocalization }} is required</ng-container>
               </ng-template>
             </nz-form-control>
           </nz-form-item>

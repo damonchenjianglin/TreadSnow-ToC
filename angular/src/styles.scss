@@ -1,5 +1,76 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* NG-ZORRO 全局样式覆盖：圆角与边框匹配 Bootstrap 5 .card 风格 */
+:root {
+  --app-primary-color: #355dff;
+}
+
+/* nz-card：与 Bootstrap 5 card 一致（border-radius: 0.375rem, border: rgba(0,0,0,0.175)） */
+.ant-card {
+  border-radius: 12px;
+  border: none;
+}
+
+/* 按钮与表格之间的分隔线去掉 */
+.ant-card-head {
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
+
+/* nz-table：去掉表格边框线 */
+.ant-table-wrapper {
+  border-radius: 0.375rem;
+}
+
+.ant-table {
+  border: none;
+}
+
+.ant-table-thead > tr > th {
+  border-bottom: none;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: none;
+}
+
+/* nz-modal 圆角（content + header + footer 全覆盖） */
+.ant-modal-content {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+/* 输入框、选择器、日期选择器统一圆角 */
+.ant-input,
+.ant-select-selector,
+.ant-picker,
+.ant-input-affix-wrapper,
+.ant-input-group-wrapper {
+  border-radius: 8px !important;
+}
+
+/* 按钮统一圆角 */
+.ant-btn {
+  border-radius: 8px;
+}
+
+/* 按钮主色覆盖 */
+.ant-btn-primary {
+  background-color: var(--app-primary-color);
+  border-color: var(--app-primary-color);
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #2a4edb;
+  border-color: #2a4edb;
+}
+
+/* nz-tag 圆角 */
+.ant-tag {
+  border-radius: 0.375rem;
+}
+
 
 :root .lpx-brand-logo {
   --lpx-logo: url('/assets/images/logo/logo-light.svg');

@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
-import { AuthorRoutingModule } from './author-routing.module';
-import { AuthorComponent } from './author.component';
+import { UploadFileRoutingModule } from './upload-file-routing.module';
+import { UploadFileComponent } from './upload-file.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -10,21 +10,22 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 
 /**
- * 作者模块
- * 负责作者功能相关的组件声明和依赖导入
+ * 附件模块
+ * 负责附件功能相关的组件声明和依赖导入
  */
 @NgModule({
-  declarations: [AuthorComponent],
+  declarations: [UploadFileComponent],
   imports: [
-    AuthorRoutingModule,
+    UploadFileRoutingModule,
     SharedModule,
-    FormsModule,
     NzTableModule,
     NzButtonModule,
     NzIconModule,
@@ -32,10 +33,13 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
     NzModalModule,
     NzFormModule,
     NzInputModule,
+    NzSelectModule,
     NzDatePickerModule,
     NzCardModule,
+    NzTagModule,
     NzMenuModule,
     NzGridModule,
+    FormsModule,
   ]
 })
-export class AuthorModule { }
+export class UploadFileModule {}

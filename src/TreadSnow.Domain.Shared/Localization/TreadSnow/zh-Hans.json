@@ -41,6 +41,25 @@
         "remark": "备注",
         "Name": "名称",
         "Actions": "操作",
-        "authorName": "作者名称"
+        "authorName": "作者名称",
+
+        "Menu:Accounts": "会员管理",
+        "NewAccount": "新增会员",
+        "Phone": "手机号码",
+        "Email": "邮箱",
+        "OpenId": "OpenId",
+        "Description": "描述",
+        "No": "编号",
+
+        "Menu:Pets": "宠物管理",
+        "NewPet": "新增宠物",
+        "AccountId": "主人",
+
+        "Menu:UploadFiles": "附件管理",
+        "NewUploadFile": "新增附件",
+        "EntityName": "实体名称",
+        "RecordId": "记录Id",
+        "FileType": "文件类型",
+        "FilePath": "文件路径"
     }
 }

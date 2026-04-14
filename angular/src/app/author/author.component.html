@@ -1,99 +1,149 @@
-<div class="card">
-  <div class="card-header">
-    <div class="row">
-      <div class="col col-md-6">
-        <h5 class="card-title">
-          {{ '::Menu:Authors' | abpLocalization }}
-        </h5>
-      </div>
-      <div class="text-end col col-md-6">
-
-        <div class="text-lg-end pt-2">
-          <button *abpPermission="'TreadSnow.Authors.Create'" id="create" class="btn btn-primary" type="button"
-            (click)="createAuthor()">
-            <i class="fa fa-plus me-1"></i>
-            <span>{{ '::NewAuthor' | abpLocalization }}</span>
+<!-- 作者列表页面 -->
+<nz-card [nzTitle]="cardTitle">
+  <!-- 卡片标题模板：新增按钮靠左，搜索框靠右 -->
+  <ng-template #cardTitle>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- 新增按钮 -->
+        <button *abpPermission="'TreadSnow.Authors.Create'" nz-button nzType="primary" style="border-radius: 6px;" (click)="createAuthor()">
+          <span>{{ '::NewAuthor' | abpLocalization }}</span>
+        </button>
+        <!-- 导出按钮组 -->
+        <nz-button-group>
+          <button nz-button nzType="primary" nz-dropdown [nzDropdownMenu]="exportMenu" nzTrigger="hover" style="border-radius: 6px;">
+            <span nz-icon nzType="export" nzTheme="outline"></span>
+            <span>导出</span>
+            <span nz-icon nzType="down"></span>
           </button>
+        </nz-button-group>
+        <nz-dropdown-menu #exportMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item (click)="exportCurrent()">
+              <span nz-icon nzType="filter" nzTheme="outline"></span>
+              导出当前条件
+            </li>
+            <li nz-menu-item (click)="exportAll()">
+              <span nz-icon nzType="database" nzTheme="outline"></span>
+              导出所有数据
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+      <!-- 名称搜索框（放大镜在右侧） -->
+      <nz-input-group [nzSuffix]="searchIcon" style="width: 240px;">
+        <input nz-input placeholder="Search by name..." [(ngModel)]="searchText" (ngModelChange)="onSearch($event)" />
+      </nz-input-group>
+      <ng-template #searchIcon>
+        <span nz-icon nzType="search" nzTheme="outline" style="cursor: pointer;"></span>
+      </ng-template>
+    </div>
+  </ng-template>
+
+  <!-- 作者数据表格 -->
+  <nz-table
+    #authorTable
+    nzShowPagination
+    nzShowSizeChanger
+    [nzData]="author.items"
+    [nzTotal]="author.totalCount"
+    [nzPageSize]="list.maxResultCount"
+    [nzPageIndex]="currentPage"
+    [nzFrontPagination]="false"
+    [nzLoading]="loading"
+    (nzPageIndexChange)="onPageIndexChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)"
+  >
+    <thead>
+      <tr>
+        <th nzShowSort [nzSortFn]="sortByName">{{ '::Name' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByBirthDate">{{ '::BirthDate' | abpLocalization }}</th>
+        <th>{{ '::ShortBio' | abpLocalization }}</th>
+        <th nzWidth="120px">{{ '::Actions' | abpLocalization }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of authorTable.data">
+        <!-- 作者名称 -->
+        <td>{{ row.name }}</td>
+        <!-- 出生日期 -->
+        <td>{{ row.birthDate | date }}</td>
+        <!-- 简介 -->
+        <td>{{ row.shortBio }}</td>
+        <!-- 操作列：hover触发编辑和删除下拉菜单 -->
+        <td>
+          <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
+            <span nz-icon nzType="setting" nzTheme="outline"></span>
+            {{ '::Actions' | abpLocalization }}
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actionMenu="nzDropdownMenu">
+            <ul nz-menu>
+              <li *abpPermission="'TreadSnow.Authors.Edit'" nz-menu-item (click)="editAuthor(row.id)">
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+                {{ '::Edit' | abpLocalization }}
+              </li>
+              <li *abpPermission="'TreadSnow.Authors.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+                {{ '::Delete' | abpLocalization }}
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-card>
+
+<!-- 新增/编辑作者弹窗 -->
+<nz-modal
+  [(nzVisible)]="isModalOpen"
+  [nzTitle]="(selectedAuthor.id ? '::Edit' : '::NewAuthor') | abpLocalization"
+  [nzOkText]="'::Save' | abpLocalization"
+  [nzCancelText]="'::Close' | abpLocalization"
+  [nzOkDisabled]="form?.invalid"
+  nzWidth="620px"
+  (nzOnOk)="save()"
+  (nzOnCancel)="closeModal()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <!-- 左列 -->
+        <div nz-col [nzSpan]="12">
+          <!-- 作者名称输入框 -->
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="author-name">{{ '::Name' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="nameErrorTpl">
+              <input nz-input id="author-name" formControlName="name" />
+              <ng-template #nameErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">Name is required</ng-container>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- 出生日期选择器 -->
+          <nz-form-item>
+            <nz-form-label nzRequired>{{ '::BirthDate' | abpLocalization }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="dateErrorTpl">
+              <nz-date-picker formControlName="birthDate" style="width: 100%;"></nz-date-picker>
+              <ng-template #dateErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')">Birth date is required</ng-container>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- 右列 -->
+        <div nz-col [nzSpan]="12">
+          <!-- 简介文本框 -->
+          <nz-form-item>
+            <nz-form-label nzFor="author-shortBio">{{ '::ShortBio' | abpLocalization }}</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input id="author-shortBio" formControlName="shortBio" [nzAutosize]="{ minRows: 4, maxRows: 6 }"></textarea>
+            </nz-form-control>
+          </nz-form-item>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="card-body">
-    <ngx-datatable [rows]="author.items" [count]="author.totalCount" [list]="list" default>
-      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [maxWidth]="150" [sortable]="false">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <div ngbDropdown container="body" class="d-inline-block">
-            <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              ngbDropdownToggle>
-              <i class="fa fa-cog me-1"></i>{{ '::Actions' | abpLocalization }}
-            </button>
-            <div ngbDropdownMenu>
-              <button *abpPermission="'TreadSnow.Authors.Edit'" ngbDropdownItem (click)="editAuthor(row.id)">
-                {{ '::Edit' | abpLocalization }}
-              </button>
-              <button *abpPermission="'TreadSnow.Authors.Delete'" ngbDropdownItem (click)="delete(row.id)">
-                {{ '::Delete' | abpLocalization }}
-              </button>
-            </div>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Name' | abpLocalization" prop="name">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.name }}
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::BirthDate' | abpLocalization" prop="birthDate">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.birthDate | date }}
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::ShortBio' | abpLocalization" prop="shortBio">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.shortBio }}
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
-  </div>
-</div>
-
-<!-- Add the modal here -->
-<abp-modal [(visible)]="isModalOpen">
-  <ng-template #abpHeader>
-    <h3>{{ (selectedAuthor.id ? '::Edit' : '::NewAuthor' ) | abpLocalization }}</h3>
-  </ng-template>
-
-  <ng-template #abpBody>
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="mt-2">
-        <label for="author-name">Name</label><span> * </span>
-        <input type="text" id="author-name" class="form-control" formControlName="name" autofocus />
-      </div>
-
-      <div class="mt-2">
-        <label>Birth date</label><span> * </span>
-        <input #datepicker="ngbDatepicker" class="form-control" name="datepicker" formControlName="birthDate"
-          ngbDatepicker (click)="datepicker.toggle()" />
-      </div>
-
-      <div class="mt-2">
-        <label for="author-shortBio">ShortBio</label><span> * </span>
-        <textarea id="author-shortBio" class="form-control" formControlName="shortBio"></textarea>
-      </div>
-
     </form>
-  </ng-template>
-
-  <ng-template #abpFooter>
-    <button type="button" class="btn btn-secondary" abpClose>
-      {{ '::Close' | abpLocalization }}
-    </button>
-
-    <!--added save button-->
-    <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
-      <i class="fa fa-check mr-1"></i>
-      {{ '::Save' | abpLocalization }}
-    </button>
-  </ng-template>
-
-</abp-modal>
+  </ng-container>
+</nz-modal>

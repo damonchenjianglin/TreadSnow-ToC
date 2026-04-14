@@ -16,7 +16,7 @@ namespace TreadSnow.Pets
         /// <summary>
         /// 租户Id
         /// </summary>
-        public Guid TenantId { get; set; }
+        public Guid? TenantId { get; set; }
 
         /// <summary>
         /// 编号

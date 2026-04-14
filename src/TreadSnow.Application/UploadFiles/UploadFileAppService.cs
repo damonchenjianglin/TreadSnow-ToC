@@ -37,17 +37,34 @@ namespace TreadSnow.UploadFiles
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+        /// <summary>
+        /// 获取附件列表（EntityName和RecordId可选，不传则查所有）
+        /// </summary>
+        /// <param name="input">查询条件</param>
+        /// <returns>分页结果</returns>
         public async Task<PagedResultDto<UploadFileDto>> GetListAsync(GetUploadFileListDto input)
         {
             var queryable = await _repository.GetQueryableAsync();
-            var query = queryable.Where(x => x.EntityName == input.EntityName && x.RecordId == input.RecordId).OrderBy(x => "Name");
+            var query = queryable.AsQueryable();
 
-            var UploadFiles = await AsyncExecuter.ToListAsync(query);
-            var totalCount = await AsyncExecuter.CountAsync(queryable);
+            if (!string.IsNullOrWhiteSpace(input.EntityName))
+            {
+                query = query.Where(x => x.EntityName == input.EntityName);
+            }
+            if (!string.IsNullOrWhiteSpace(input.RecordId))
+            {
+                query = query.Where(x => x.RecordId == input.RecordId);
+            }
+
+            query = query.OrderBy(x => x.Name);
+            var totalCount = await AsyncExecuter.CountAsync(query);
+
+            query = query.Skip(input.SkipCount).Take(input.MaxResultCount);
+            var uploadFiles = await AsyncExecuter.ToListAsync(query);
 
             return new PagedResultDto<UploadFileDto>(
                 totalCount,
-                ObjectMapper.Map<List<UploadFile>, List<UploadFileDto>>(UploadFiles)
+                ObjectMapper.Map<List<UploadFile>, List<UploadFileDto>>(uploadFiles)
             );
         }
 

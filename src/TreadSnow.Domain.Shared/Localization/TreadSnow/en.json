@@ -51,6 +51,40 @@
         "Permission:Authors.Delete": "Deleting the authors",
 
 
+        //account entity
+        "Menu:Accounts": "Accounts",
+        "NewAccount": "New account",
+        "Phone": "Phone",
+        "Email": "Email",
+        "OpenId": "OpenId",
+        "Description": "Description",
+        "No": "No",
+        "Permission:Accounts": "Account Management",
+        "Permission:Accounts.Create": "Creating new accounts",
+        "Permission:Accounts.Edit": "Editing the accounts",
+        "Permission:Accounts.Delete": "Deleting the accounts",
+
+        //pet entity
+        "Menu:Pets": "Pets",
+        "NewPet": "New pet",
+        "AccountId": "Owner",
+        "Permission:Pets": "Pet Management",
+        "Permission:Pets.Create": "Creating new pets",
+        "Permission:Pets.Edit": "Editing the pets",
+        "Permission:Pets.Delete": "Deleting the pets",
+
+        //uploadFile entity
+        "Menu:UploadFiles": "Files",
+        "NewUploadFile": "New file",
+        "EntityName": "Entity Name",
+        "RecordId": "Record Id",
+        "FileType": "File Type",
+        "FilePath": "File Path",
+        "Permission:UploadFiles": "File Management",
+        "Permission:UploadFiles.Create": "Creating new files",
+        "Permission:UploadFiles.Edit": "Editing the files",
+        "Permission:UploadFiles.Delete": "Deleting the files",
+
         "Welcome": "Welcome"
     }
 }

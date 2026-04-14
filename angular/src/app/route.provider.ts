@@ -31,5 +31,26 @@ function configureRoutes() {
         layout: eLayoutType.application,
         requiredPolicy: 'TreadSnow.Authors',
       },
+      {
+        path: '/accounts',
+        name: '::Menu:Accounts',
+        iconClass: 'fas fa-users',
+        layout: eLayoutType.application,
+        requiredPolicy: 'TreadSnow.Accounts',
+      },
+      {
+        path: '/pets',
+        name: '::Menu:Pets',
+        iconClass: 'fas fa-paw',
+        layout: eLayoutType.application,
+        requiredPolicy: 'TreadSnow.Pets',
+      },
+      {
+        path: '/upload-files',
+        name: '::Menu:UploadFiles',
+        iconClass: 'fas fa-file-upload',
+        layout: eLayoutType.application,
+        requiredPolicy: 'TreadSnow.UploadFiles',
+      },
   ]);
 }
