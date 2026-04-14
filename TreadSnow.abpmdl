@@ -1,0 +1,101 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "4.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "TreadSnow.Application": {
+      "path": "src/TreadSnow.Application/TreadSnow.Application.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.Application.Tests": {
+      "path": "test/TreadSnow.Application.Tests/TreadSnow.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "TreadSnow.Domain.Shared": {
+      "path": "src/TreadSnow.Domain.Shared/TreadSnow.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.Application.Contracts": {
+      "path": "src/TreadSnow.Application.Contracts/TreadSnow.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.HttpApi": {
+      "path": "src/TreadSnow.HttpApi/TreadSnow.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.HttpApi.Client": {
+      "path": "src/TreadSnow.HttpApi.Client/TreadSnow.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.EntityFrameworkCore.Tests": {
+      "path": "test/TreadSnow.EntityFrameworkCore.Tests/TreadSnow.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "TreadSnow.EntityFrameworkCore": {
+      "path": "src/TreadSnow.EntityFrameworkCore/TreadSnow.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.TestBase": {
+      "path": "test/TreadSnow.TestBase/TreadSnow.TestBase.abppkg",
+      "folder": "test"
+    },
+    "TreadSnow.Domain.Tests": {
+      "path": "test/TreadSnow.Domain.Tests/TreadSnow.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "TreadSnow.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/TreadSnow.HttpApi.Client.ConsoleTestApp/TreadSnow.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "TreadSnow.DbMigrator": {
+      "path": "src/TreadSnow.DbMigrator/TreadSnow.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.HttpApi.Host": {
+      "path": "src/TreadSnow.HttpApi.Host/TreadSnow.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "TreadSnow.Domain": {
+      "path": "src/TreadSnow.Domain/TreadSnow.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}

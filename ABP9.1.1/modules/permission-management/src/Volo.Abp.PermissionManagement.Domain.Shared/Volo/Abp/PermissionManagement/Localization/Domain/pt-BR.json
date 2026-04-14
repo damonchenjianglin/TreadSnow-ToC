@@ -1,0 +1,12 @@
+{
+  "culture": "pt-BR",
+  "texts": {
+    "Permissions": "Permissões",
+    "OnlyProviderPermissons": "Apenas este provedor",
+    "All": "Todos",
+    "SelectAllInAllTabs": "Conceder todas as permissões",
+    "SelectAllInThisTab": "Selecionar todos",
+    "SaveWithoutAnyPermissionsWarningMessage": "Tem certeza que deseja salvar sem nenhuma permissão?",
+    "PermissionGroup": "Grupo de permissão"
+  }
+}

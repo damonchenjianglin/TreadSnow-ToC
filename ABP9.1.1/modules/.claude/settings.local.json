@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -d */)",
+      "Bash(grep -E \"\\\\\\\\.\\\\\\\\..*modules\")",
+      "Bash(sed 's|E:/TreadSnow/ABP9.1.1/modules/||')",
+      "Read(//tmp/**)",
+      "Bash(awk -F: '{print $1\":\"$2}')"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+.abp-toast-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 350px;
+  min-height: 80px;
+  z-index: 1900;
+  &.new-on-top {
+    flex-direction: column-reverse;
+  }
+}
+@media only screen and (max-width: 768px) {
+  .abp-toast-container {
+    min-width: 100%;
+  }
+}
