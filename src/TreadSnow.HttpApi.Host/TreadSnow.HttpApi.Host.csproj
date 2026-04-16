@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Volo.Abp.Account.Web.OpenIddict" Version="9.1.1" />
+    <ProjectReference Include="..\..\ABP9.1.1\modules\account\src\Volo.Abp.Account.Web.OpenIddict\Volo.Abp.Account.Web.OpenIddict.csproj" />
   </ItemGroup>
 
   <ItemGroup>

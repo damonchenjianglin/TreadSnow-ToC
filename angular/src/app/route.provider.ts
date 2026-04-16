@@ -18,20 +18,6 @@ function configureRoutes() {
         layout: eLayoutType.application,
       },
       {
-        path: '/books',
-        name: '::Menu:Books',
-        iconClass: 'fas fa-book',
-        layout: eLayoutType.application,
-        requiredPolicy: 'TreadSnow.Books',
-      },
-      {
-        path: '/authors',
-        name: '::Menu:Authors',
-        iconClass: 'fas fa-book',
-        layout: eLayoutType.application,
-        requiredPolicy: 'TreadSnow.Authors',
-      },
-      {
         path: '/accounts',
         name: '::Menu:Accounts',
         iconClass: 'fas fa-users',

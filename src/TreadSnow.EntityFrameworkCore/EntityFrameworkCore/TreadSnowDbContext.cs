@@ -14,8 +14,6 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
-using TreadSnow.Books;
-using TreadSnow.Authors;
 using TreadSnow.Accounts;
 using TreadSnow.Pets;
 using TreadSnow.UploadFiles;
@@ -32,10 +30,7 @@ public class TreadSnowDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
-    public DbSet<Book> Books { get; set; }
-    public DbSet<Author> Authors { get; set; }
-
-    #region ×Ô¶¨Òå±íµÄDbSet
+    #region ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½DbSet
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Pet> Pets { get; set; }
     public DbSet<UploadFile> UploadFiles { get; set; }
@@ -93,67 +88,44 @@ public class TreadSnowDbContext :
         builder.ConfigureTenantManagement();
         builder.ConfigureBlobStoring();
 
-        builder.Entity<Book>(b =>
-        {
-            b.ToTable(TreadSnowConsts.DbTablePrefix + "Books",
-                TreadSnowConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.Name).IsRequired().HasMaxLength(128);
-            //Íâ¼ü
-            b.HasOne<Author>().WithMany().HasForeignKey(x => x.AuthorId).IsRequired();
-        });
-        builder.Entity<Author>(b =>
-        {
-            b.ToTable(TreadSnowConsts.DbTablePrefix + "Authors",
-                TreadSnowConsts.DbSchema);
+        #region ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹
 
-            b.ConfigureByConvention();
-
-            b.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(AuthorConsts.MaxNameLength);
-
-            b.HasIndex(x => x.Name);
-        });
-
-        #region ×Ô¶¨Òå±í½á¹¹
-
-        //»áÔ±±í
+        //ï¿½ï¿½Ô±ï¿½ï¿½
         builder.Entity<Account>(b =>
         {
             b.ToTable(TreadSnowConsts.DbTablePrefix + "Accounts", TreadSnowConsts.DbSchema);
             b.ConfigureByConvention();
-            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //×â»§id
-            b.Property(x => x.No).UseIdentityColumn(1000, 1); //±àºÅ
-            b.Property(x => x.Name).IsRequired().HasMaxLength(64);  //ÐÕÃû
-            b.Property(x => x.Phone).IsRequired().HasMaxLength(64); //ÊÖ»úºÅÂë
-            b.Property(x => x.Email).IsRequired().HasMaxLength(64); //ÓÊÏä
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //ï¿½â»§id
+            b.Property(x => x.No).UseIdentityColumn(1000, 1); //ï¿½ï¿½ï¿½
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64);  //ï¿½ï¿½ï¿½ï¿½
+            b.Property(x => x.Phone).IsRequired().HasMaxLength(64); //ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½
+            b.Property(x => x.Email).IsRequired().HasMaxLength(64); //ï¿½ï¿½ï¿½ï¿½
             b.Property(x => x.OpenId).HasMaxLength(64); //OpenId
-            b.Property(x => x.Description).HasMaxLength(1000); //ÃèÊö
+            b.Property(x => x.Description).HasMaxLength(1000); //ï¿½ï¿½ï¿½ï¿½
         });
 
-        //³èÎï±í
+        //ï¿½ï¿½ï¿½ï¿½ï¿½
         builder.Entity<Pet>(b =>
         {
             b.ToTable(TreadSnowConsts.DbTablePrefix + "Pets", TreadSnowConsts.DbSchema);
             b.ConfigureByConvention();
-            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //×â»§id
-            b.Property(x => x.No).UseIdentityColumn(1000, 1); //±àºÅ
-            b.Property(x => x.Name).IsRequired().HasMaxLength(64).IsRequired();  //ÐÕÃû
-            b.HasOne<Account>().WithMany().HasForeignKey(x => x.AccountId).IsRequired(); //Ö÷ÈË
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //ï¿½â»§id
+            b.Property(x => x.No).UseIdentityColumn(1000, 1); //ï¿½ï¿½ï¿½
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64).IsRequired();  //ï¿½ï¿½ï¿½ï¿½
+            b.HasOne<Account>().WithMany().HasForeignKey(x => x.AccountId).IsRequired(); //ï¿½ï¿½ï¿½ï¿½
         });
 
-        //¸½¼þ±í
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         builder.Entity<UploadFile>(b =>
         {
             b.ToTable(TreadSnowConsts.DbTablePrefix + "UploadFiles", TreadSnowConsts.DbSchema);
             b.ConfigureByConvention();
-            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //×â»§id
-            b.Property(x => x.EntityName).IsRequired().HasMaxLength(64);  //ÊµÌåÃû³Æ
-            b.Property(x => x.RecordId).IsRequired().HasMaxLength(64); //¼ÇÂ¼id
-            b.Property(x => x.Name).IsRequired().HasMaxLength(64); //Ãû³Æ
-            b.Property(x => x.Type).IsRequired().HasMaxLength(64); //ÎÄ¼þÀàÐÍ
-            b.Property(x => x.Path).IsRequired().HasMaxLength(1000); //Â·¾¶
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //ï¿½â»§id
+            b.Property(x => x.EntityName).IsRequired().HasMaxLength(64);  //Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            b.Property(x => x.RecordId).IsRequired().HasMaxLength(64); //ï¿½ï¿½Â¼id
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64); //ï¿½ï¿½ï¿½ï¿½
+            b.Property(x => x.Type).IsRequired().HasMaxLength(64); //ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
+            b.Property(x => x.Path).IsRequired().HasMaxLength(1000); //Â·ï¿½ï¿½
         });
         #endregion
     }

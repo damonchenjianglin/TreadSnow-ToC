@@ -1,8 +1,36 @@
 diff --git a/node_modules/@abp/ng.identity/fesm2022/abp-ng.identity.mjs b/node_modules/@abp/ng.identity/fesm2022/abp-ng.identity.mjs
-index 6671110..3ef28dc 100644
+index 6671110..e694cd9 100644
 --- a/node_modules/@abp/ng.identity/fesm2022/abp-ng.identity.mjs
 +++ b/node_modules/@abp/ng.identity/fesm2022/abp-ng.identity.mjs
-@@ -461,7 +461,7 @@ const DEFAULT_USERS_CREATE_FORM_PROPS = FormProp.createMany([
+@@ -402,6 +402,13 @@ const DEFAULT_USERS_ENTITY_PROPS = EntityProp.createMany([
+         sortable: true,
+         columnWidth: 250,
+     },
++    {
++        type: "string" /* ePropType.String */,
++        name: 'openId',
++        displayName: 'OpenId',
++        sortable: true,
++        columnWidth: 200,
++    },
+ ]);
+ 
+ const DEFAULT_USERS_CREATE_FORM_PROPS = FormProp.createMany([
+@@ -448,6 +455,13 @@ const DEFAULT_USERS_CREATE_FORM_PROPS = FormProp.createMany([
+         id: 'phone-number',
+         validators: () => [Validators.maxLength(16)],
+     },
++    {
++        type: "string" /* ePropType.String */,
++        name: 'openId',
++        displayName: 'OpenId',
++        id: 'open-id',
++        validators: () => [Validators.maxLength(128)],
++    },
+     {
+         type: "boolean" /* ePropType.Boolean */,
+         name: 'isActive',
+@@ -461,7 +475,7 @@ const DEFAULT_USERS_CREATE_FORM_PROPS = FormProp.createMany([
          displayName: 'AbpIdentity::DisplayName:LockoutEnabled',
          id: 'lockout-checkbox',
          defaultValue: true,

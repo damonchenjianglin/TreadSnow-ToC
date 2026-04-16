@@ -1,8 +1,6 @@
 using AutoMapper;
 using System.Collections.Generic;
 using TreadSnow.Accounts;
-using TreadSnow.Authors;
-using TreadSnow.Books;
 using TreadSnow.Pets;
 using TreadSnow.UploadFiles;
 
@@ -12,16 +10,7 @@ public class TreadSnowApplicationAutoMapperProfile : Profile
 {
     public TreadSnowApplicationAutoMapperProfile()
     {
-        CreateMap<Book, BookDto>();
-        CreateMap<CreateUpdateBookDto, Book>();
-        /* You can configure your AutoMapper mapping configuration here.
-         * Alternatively, you can split your mapping configurations
-         * into multiple profile classes for a better organization. */
-        CreateMap<Author, AuthorDto>();
-
-        CreateMap<Author, AuthorLookupDto>();
-
-        //�û�
+        //会员
         CreateMap<Account, AccountDto>();
         CreateMap<CreateAccountDto, Account>();
         CreateMap<UpdateAccountDto, Account>();

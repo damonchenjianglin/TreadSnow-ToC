@@ -22,8 +22,10 @@ public class AccountController : AbpControllerBase, IAccountAppService
     public virtual Task<IdentityUserDto> RegisterAsync(RegisterDto input)
     {
         //注释注册对外接口
+        //return null;
+
+        //保留注册接口
         return AccountAppService.RegisterAsync(input);
-        return null;
     }
 
     [HttpPost]
@@ -31,8 +33,10 @@ public class AccountController : AbpControllerBase, IAccountAppService
     public virtual Task SendPasswordResetCodeAsync(SendPasswordResetCodeDto input)
     {
         //注释忘记密码对外接口
+        //return null;
+
+        //保留忘记密码接口
         return AccountAppService.SendPasswordResetCodeAsync(input);
-        return null;
     }
 
     [HttpPost]
