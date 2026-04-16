@@ -1,0 +1,195 @@
+<!-- 用户管理列表页面 -->
+<nz-card [nzTitle]="cardTitle">
+  <ng-template #cardTitle>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <!-- 新增按钮 -->
+      <button *abpPermission="'AbpIdentity.Users.Create'" nz-button nzType="primary" (click)="createUser()">
+        <span>{{ '::NewUser' | abpLocalization }}</span>
+      </button>
+      <!-- 导出按钮组 -->
+      <nz-button-group>
+        <button nz-button nzType="primary" nz-dropdown [nzDropdownMenu]="exportMenu" nzTrigger="hover" style="border-radius: 6px;">
+          <span nz-icon nzType="export" nzTheme="outline"></span>
+          <span>导出</span>
+          <span nz-icon nzType="down"></span>
+        </button>
+      </nz-button-group>
+      <nz-dropdown-menu #exportMenu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item (click)="exportCurrent()">
+            <span nz-icon nzType="filter" nzTheme="outline"></span>
+            导出当前条件
+          </li>
+          <li nz-menu-item (click)="exportAll()">
+            <span nz-icon nzType="database" nzTheme="outline"></span>
+            导出所有数据
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+    </div>
+  </ng-template>
+
+  <!-- 用户数据表格 -->
+  <nz-table
+    #userTable
+    nzShowPagination
+    nzShowSizeChanger
+    [nzData]="users.items"
+    [nzTotal]="users.totalCount"
+    [nzPageSize]="list.maxResultCount"
+    [nzPageIndex]="currentPage"
+    [nzFrontPagination]="false"
+    [nzLoading]="loading"
+    (nzPageIndexChange)="onPageIndexChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)"
+  >
+    <thead>
+      <tr>
+        <!-- 用户名列：带放大镜筛选 -->
+        <th nzShowSort [nzSortFn]="sortByUserName" [nzCustomFilter]="true">
+          {{ '::UserName' | abpLocalization }}
+          <nz-filter-trigger [nzVisible]="userNameFilterVisible" [nzActive]="!!userNameFilter" [nzDropdownMenu]="userNameFilterMenu" (nzVisibleChange)="userNameFilterVisible = $event">
+            <span nz-icon nzType="search"></span>
+          </nz-filter-trigger>
+        </th>
+        <th nzShowSort [nzSortFn]="sortByEmail">{{ '::Email' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByPhone">{{ '::PhoneNumber' | abpLocalization }}</th>
+        <th>{{ '::OpenId' | abpLocalization }}</th>
+        <th nzWidth="150px">{{ '::Actions' | abpLocalization }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of userTable.data">
+        <td>
+          <nz-badge [nzStatus]="row.isActive ? 'success' : 'error'" nzText="{{ row.userName }}"></nz-badge>
+        </td>
+        <td>{{ row.email }}</td>
+        <td>{{ row.phoneNumber }}</td>
+        <td>{{ row.extraProperties?.OpenId }}</td>
+        <td>
+          <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
+            <span nz-icon nzType="setting" nzTheme="outline"></span>
+            {{ '::Actions' | abpLocalization }}
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actionMenu="nzDropdownMenu">
+            <ul nz-menu>
+              <li *abpPermission="'AbpIdentity.Users.Update'" nz-menu-item (click)="editUser(row.id)">
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+                {{ '::Edit' | abpLocalization }}
+              </li>
+              <li *abpPermission="'AbpIdentity.Users.Delete'" nz-menu-item nzDanger (click)="deleteUser(row)" [nzDisabled]="row.id === currentUserId">
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+                {{ '::Delete' | abpLocalization }}
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-card>
+
+<!-- 用户名列筛选下拉菜单 -->
+<nz-dropdown-menu #userNameFilterMenu="nzDropdownMenu">
+  <div style="padding: 8px;">
+    <input nz-input placeholder="搜索用户名" [(ngModel)]="userNameFilter" (keyup.enter)="onUserNameFilterSearch()" style="width: 180px; margin-bottom: 8px; display: block;" />
+    <div style="display: flex; justify-content: space-between;">
+      <button nz-button nzSize="small" nzType="primary" (click)="onUserNameFilterSearch()">确定</button>
+      <button nz-button nzSize="small" (click)="onUserNameFilterReset()">重置</button>
+    </div>
+  </div>
+</nz-dropdown-menu>
+
+<!-- 新增/编辑用户弹窗 -->
+<nz-modal
+  [(nzVisible)]="isModalOpen"
+  [nzTitle]="(selectedUser.id ? '::Edit' : '::NewUser') | abpLocalization"
+  [nzOkText]="'::Save' | abpLocalization"
+  [nzCancelText]="null"
+  [nzOkDisabled]="form?.invalid"
+  nzWidth="680px"
+  (nzOnOk)="save()"
+  (nzOnCancel)="closeModal()"
+>
+  <ng-container *nzModalContent>
+    <nz-tabset [(nzSelectedIndex)]="selectedTabIndex">
+      <!-- Tab 1: 用户信息 -->
+      <nz-tab [nzTitle]="'::UserInformation' | abpLocalization">
+        <form nz-form [formGroup]="form" nzLayout="vertical">
+          <div nz-row [nzGutter]="16">
+            <!-- 左列 -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired nzFor="user-name">{{ '::UserName' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-name" formControlName="userName" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label [nzRequired]="isNew" nzFor="user-password">{{ '::Password' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input type="password" id="user-password" formControlName="password" autocomplete="new-password" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzFor="user-display-name">{{ '::Name' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-display-name" formControlName="name" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzFor="user-surname">{{ '::Surname' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-surname" formControlName="surname" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <!-- 右列 -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired nzFor="user-email">{{ '::Email' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-email" formControlName="email" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzFor="user-phone">{{ '::PhoneNumber' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-phone" formControlName="phoneNumber" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzFor="user-openid">{{ '::OpenId' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <input nz-input id="user-openid" formControlName="openId" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label>{{ '::IsActive' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <nz-switch formControlName="isActive"></nz-switch>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label>{{ '::LockoutEnabled' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <nz-switch formControlName="lockoutEnabled"></nz-switch>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+        </form>
+      </nz-tab>
+      <!-- Tab 2: 角色分配 -->
+      <nz-tab [nzTitle]="'::RoleAssignment' | abpLocalization">
+        <div style="padding: 12px 16px;">
+          <div *ngFor="let role of assignableRoles" style="margin-bottom: 10px;">
+            <label nz-checkbox [(ngModel)]="roleCheckedMap[role.name!]" [ngModelOptions]="{standalone: true}">{{ role.name }}</label>
+          </div>
+        </div>
+      </nz-tab>
+    </nz-tabset>
+  </ng-container>
+</nz-modal>
+

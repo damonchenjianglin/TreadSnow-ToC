@@ -39,6 +39,7 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
+using Volo.Abp.MailKit;
 
 namespace TreadSnow;
 
@@ -52,7 +53,8 @@ namespace TreadSnow;
     typeof(TreadSnowEntityFrameworkCoreModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(AbpMailKitModule)
     )]
 public class TreadSnowHttpApiHostModule : AbpModule
 {
@@ -119,6 +121,7 @@ public class TreadSnowHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
     }
+
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {

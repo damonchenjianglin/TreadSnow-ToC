@@ -1,11 +1,10 @@
-<!-- 宠物列表页面 -->
+<!-- 角色-菜单权限列表页面 -->
 <nz-card [nzTitle]="cardTitle">
-  <!-- 卡片标题模板：新增按钮 + 导出按钮靠左 -->
   <ng-template #cardTitle>
     <div style="display: flex; align-items: center; gap: 8px;">
       <!-- 新增按钮 -->
-      <button *abpPermission="'TreadSnow.Pets.Create'" nz-button nzType="primary" style="border-radius: 6px;" (click)="createPet()">
-        <span>{{ '::NewPet' | abpLocalization }}</span>
+      <button *abpPermission="'AbpIdentity.Roles.Create'" nz-button nzType="primary" (click)="createRole()">
+        <span>{{ '::NewRole' | abpLocalization }}</span>
       </button>
       <!-- 导出按钮组 -->
       <nz-button-group>
@@ -30,13 +29,13 @@
     </div>
   </ng-template>
 
-  <!-- 宠物数据表格 -->
+  <!-- 角色数据表格 -->
   <nz-table
-    #petTable
+    #roleTable
     nzShowPagination
     nzShowSizeChanger
-    [nzData]="pet.items"
-    [nzTotal]="pet.totalCount"
+    [nzData]="roles.items"
+    [nzTotal]="roles.totalCount"
     [nzPageSize]="list.maxResultCount"
     [nzPageIndex]="currentPage"
     [nzFrontPagination]="false"
@@ -46,24 +45,24 @@
   >
     <thead>
       <tr>
-        <th nzShowSort [nzSortFn]="sortByNo">{{ '::No' | abpLocalization }}</th>
         <!-- 名称列：带放大镜筛选 -->
         <th nzShowSort [nzSortFn]="sortByName" [nzCustomFilter]="true">
-          {{ '::Name' | abpLocalization }}
+          {{ '::RoleName' | abpLocalization }}
           <nz-filter-trigger [nzVisible]="nameFilterVisible" [nzActive]="!!nameFilter" [nzDropdownMenu]="nameFilterMenu" (nzVisibleChange)="nameFilterVisible = $event">
             <span nz-icon nzType="search"></span>
           </nz-filter-trigger>
         </th>
-        <th nzShowSort nzShowFilter [nzSortFn]="sortByAccountName" [nzFilters]="accountFilters" [nzFilterFn]="accountFilterFn">{{ '::AccountId' | abpLocalization }}</th>
-        <th nzWidth="120px">{{ '::Actions' | abpLocalization }}</th>
+        <th nzWidth="150px">{{ '::Actions' | abpLocalization }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of petTable.data">
-        <td>{{ row.no }}</td>
-        <td>{{ row.name }}</td>
-        <td>{{ row.accountName }}</td>
-        <!-- 操作列 -->
+      <tr *ngFor="let row of roleTable.data">
+        <td>
+          {{ row.name }}
+          <nz-tag *ngIf="row.isDefault" nzColor="blue">{{ '::IsDefault' | abpLocalization }}</nz-tag>
+          <nz-tag *ngIf="row.isPublic" nzColor="green">{{ '::IsPublic' | abpLocalization }}</nz-tag>
+          <nz-tag *ngIf="row.isStatic" nzColor="orange">{{ '::IsStatic' | abpLocalization }}</nz-tag>
+        </td>
         <td>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
@@ -72,11 +71,15 @@
           </a>
           <nz-dropdown-menu #actionMenu="nzDropdownMenu">
             <ul nz-menu>
-              <li *abpPermission="'TreadSnow.Pets.Edit'" nz-menu-item (click)="editPet(row.id)">
+              <li *abpPermission="'AbpIdentity.Roles.Update'" nz-menu-item (click)="editRole(row.id)">
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
                 {{ '::Edit' | abpLocalization }}
               </li>
-              <li *abpPermission="'TreadSnow.Pets.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
+              <li *abpPermission="'AbpIdentity.Roles.ManagePermissions'" nz-menu-item (click)="openPermissions(row)">
+                <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                {{ '::Permissions' | abpLocalization }}
+              </li>
+              <li *abpPermission="'AbpIdentity.Roles.Delete'" nz-menu-item nzDanger (click)="deleteRole(row)" [nzDisabled]="row.isStatic">
                 <span nz-icon nzType="delete" nzTheme="outline"></span>
                 {{ '::Delete' | abpLocalization }}
               </li>
@@ -88,10 +91,10 @@
   </nz-table>
 </nz-card>
 
-<!-- 名称列筛选下拉菜单（放大镜点击后弹出） -->
+<!-- 名称列筛选下拉菜单 -->
 <nz-dropdown-menu #nameFilterMenu="nzDropdownMenu">
   <div style="padding: 8px;">
-    <input nz-input placeholder="搜索名称" [(ngModel)]="nameFilter" (keyup.enter)="onNameFilterSearch()" style="width: 180px; margin-bottom: 8px; display: block;" />
+    <input nz-input placeholder="搜索角色名称" [(ngModel)]="nameFilter" (keyup.enter)="onNameFilterSearch()" style="width: 180px; margin-bottom: 8px; display: block;" />
     <div style="display: flex; justify-content: space-between;">
       <button nz-button nzSize="small" nzType="primary" (click)="onNameFilterSearch()">确定</button>
       <button nz-button nzSize="small" (click)="onNameFilterReset()">重置</button>
@@ -99,39 +102,42 @@
   </div>
 </nz-dropdown-menu>
 
-<!-- 新增/编辑宠物弹窗 -->
+<!-- 新增/编辑角色弹窗 -->
 <nz-modal
   [(nzVisible)]="isModalOpen"
-  [nzTitle]="(selectedPet.id ? '::Edit' : '::NewPet') | abpLocalization"
+  [nzTitle]="(selectedRole.id ? '::Edit' : '::NewRole') | abpLocalization"
   [nzOkText]="'::Save' | abpLocalization"
   [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
-  nzWidth="520px"
+  nzWidth="480px"
   (nzOnOk)="save()"
   (nzOnCancel)="closeModal()"
 >
   <ng-container *nzModalContent>
     <form nz-form [formGroup]="form" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired nzFor="pet-name">{{ '::Name' | abpLocalization }}</nz-form-label>
+        <nz-form-label nzRequired nzFor="role-name">{{ '::RoleName' | abpLocalization }}</nz-form-label>
         <nz-form-control [nzErrorTip]="nameErrorTpl">
-          <input nz-input id="pet-name" formControlName="name" />
+          <input nz-input id="role-name" formControlName="name" />
           <ng-template #nameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')">{{ '::Name' | abpLocalization }} is required</ng-container>
+            <ng-container *ngIf="control.hasError('required')">{{ '::RoleName' | abpLocalization }} is required</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired nzFor="pet-accountId">{{ '::AccountId' | abpLocalization }}</nz-form-label>
-        <nz-form-control [nzErrorTip]="accountErrorTpl">
-          <nz-select id="pet-accountId" formControlName="accountId" nzPlaceHolder="Select an owner" nzShowSearch>
-            <nz-option *ngFor="let account of accounts" [nzValue]="account.id" [nzLabel]="account.name"></nz-option>
-          </nz-select>
-          <ng-template #accountErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')">{{ '::AccountId' | abpLocalization }} is required</ng-container>
-          </ng-template>
-        </nz-form-control>
+        <label nz-checkbox formControlName="isDefault">{{ '::IsDefault' | abpLocalization }}</label>
+      </nz-form-item>
+      <nz-form-item>
+        <label nz-checkbox formControlName="isPublic">{{ '::IsPublic' | abpLocalization }}</label>
       </nz-form-item>
     </form>
   </ng-container>
 </nz-modal>
+
+<!-- ABP权限管理弹窗（复用ABP原生组件） -->
+<abp-permission-management
+  providerName="R"
+  [providerKey]="permissionProviderKey"
+  [(visible)]="permissionVisible"
+  [hideBadges]="true">
+</abp-permission-management>

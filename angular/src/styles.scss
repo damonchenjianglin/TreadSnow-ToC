@@ -31,7 +31,12 @@
 }
 
 .ant-table-tbody > tr > td {
-  border-bottom: none;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 表格行 hover 深灰色背景 */
+.ant-table-tbody > tr:hover > td {
+  background-color: #e6e9f0 !important;
 }
 
 /* nz-modal 圆角（content + header + footer 全覆盖） */

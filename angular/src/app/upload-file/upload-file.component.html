@@ -107,7 +107,7 @@
   [(nzVisible)]="isModalOpen"
   [nzTitle]="(selectedUploadFile.id ? '::Edit' : '::NewUploadFile') | abpLocalization"
   [nzOkText]="'::Save' | abpLocalization"
-  [nzCancelText]="'::Close' | abpLocalization"
+  [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
   nzWidth="620px"
   (nzOnOk)="save()"

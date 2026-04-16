@@ -52,6 +52,33 @@
         "Permission:UploadFiles.Edit": "Editing the files",
         "Permission:UploadFiles.Delete": "Deleting the files",
 
-        "Welcome": "Welcome"
+        "Welcome": "Welcome",
+
+        "Menu:Users": "Users",
+        "Menu:RolesPermissions": "Role-Menu Permissions",
+        "Menu:Tenants": "Tenants",
+        "NewUser": "New User",
+        "NewRole": "New Role",
+        "NewTenant": "New Tenant",
+        "UserName": "User Name",
+        "Password": "Password",
+        "Surname": "Surname",
+        "IsActive": "Active",
+        "LockoutEnabled": "Lockout Enabled",
+        "Roles": "Roles",
+        "IsDefault": "Default",
+        "IsPublic": "Public",
+        "IsStatic": "Static",
+        "Permissions": "Permissions",
+        "Features": "Features",
+        "AdminEmail": "Admin Email",
+        "AdminPassword": "Admin Password",
+        "UserInformation": "User Information",
+        "RoleAssignment": "Role Assignment",
+        "RoleList": "Role List",
+        "PhoneNumber": "Phone Number",
+        "RoleName": "Role Name",
+        "TenantName": "Tenant Name",
+        "Save": "Save"
     }
 }

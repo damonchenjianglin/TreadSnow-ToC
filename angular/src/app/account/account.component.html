@@ -110,7 +110,7 @@
   [(nzVisible)]="isModalOpen"
   [nzTitle]="(selectedAccount.id ? '::Edit' : '::NewAccount') | abpLocalization"
   [nzOkText]="'::Save' | abpLocalization"
-  [nzCancelText]="'::Close' | abpLocalization"
+  [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
   nzWidth="620px"
   (nzOnOk)="save()"

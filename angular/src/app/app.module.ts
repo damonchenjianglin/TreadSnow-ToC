@@ -15,7 +15,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { APP_ROUTE_PROVIDER } from './route.provider';
+import { APP_ROUTE_PROVIDER, APP_ROUTE_PATCH_PROVIDER } from './route.provider';
 import { provideNzI18n } from 'ng-zorro-antd/i18n';
 import { zh_CN } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
@@ -52,6 +52,7 @@ registerLocaleData(zh);
     provideFeatureManagementConfig(),
     provideAccountConfig(),
     provideTenantManagementConfig(),
+    APP_ROUTE_PATCH_PROVIDER,
     provideAbpThemeShared(),
     provideNzI18n(zh_CN),
     provideAnimationsAsync(),

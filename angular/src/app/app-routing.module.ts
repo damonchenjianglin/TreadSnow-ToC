@@ -12,15 +12,9 @@ const routes: Routes = [
     path: 'account',
     loadChildren: () => import('@abp/ng.account').then(m => m.AccountModule.forLazy()),
   },
-  {
-    path: 'identity',
-    loadChildren: () => import('@abp/ng.identity').then(m => m.IdentityModule.forLazy()),
-  },
-  {
-    path: 'tenant-management',
-    loadChildren: () =>
-      import('@abp/ng.tenant-management').then(m => m.TenantManagementModule.forLazy()),
-  },
+  { path: 'users', loadChildren: () => import('./user/user.module').then(m => m.UserModule) },
+  { path: 'roles', loadChildren: () => import('./role/role.module').then(m => m.RoleModule) },
+  { path: 'tenants', loadChildren: () => import('./tenant/tenant.module').then(m => m.TenantModule) },
   {
     path: 'setting-management',
     loadChildren: () =>
