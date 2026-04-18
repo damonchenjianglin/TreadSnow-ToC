@@ -29,7 +29,7 @@
           </ul>
         </nz-dropdown-menu>
       </div>
-      <!-- 名称搜索框（放大镜在右侧） -->
+      <!-- 名称搜索框 -->
       <nz-input-group [nzSuffix]="searchIcon" style="width: 240px;">
         <input nz-input placeholder="Search by name..." [(ngModel)]="searchText" (ngModelChange)="onSearch($event)" />
       </nz-input-group>
@@ -50,35 +50,42 @@
     [nzPageIndex]="currentPage"
     [nzFrontPagination]="false"
     [nzLoading]="loading"
+    [nzScroll]="{ x: '1550px' }"
     (nzPageIndexChange)="onPageIndexChange($event)"
     (nzPageSizeChange)="onPageSizeChange($event)"
   >
     <thead>
       <tr>
-        <th nzShowSort [nzSortFn]="sortByName">{{ '::Name' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByEntityName">{{ '::EntityName' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByRecordId">{{ '::RecordId' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByType">{{ '::FileType' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByPath">{{ '::FilePath' | abpLocalization }}</th>
-        <th nzWidth="120px">{{ '::Actions' | abpLocalization }}</th>
+        <th nzWidth="120px" nzShowSort [nzSortFn]="sortByName">{{ '::Name' | abpLocalization }}</th>
+        <th nzWidth="120px" nzShowSort [nzSortFn]="sortByEntityName">{{ '::EntityName' | abpLocalization }}</th>
+        <th nzWidth="120px" nzShowSort [nzSortFn]="sortByRecordId">{{ '::RecordId' | abpLocalization }}</th>
+        <th nzWidth="100px" nzShowSort [nzSortFn]="sortByType">{{ '::FileType' | abpLocalization }}</th>
+        <th nzWidth="150px" nzShowSort [nzSortFn]="sortByPath">{{ '::FilePath' | abpLocalization }}</th>
+        <th nzWidth="110px" nzShowSort nzShowFilter [nzSortFn]="sortByOwnerName" [nzFilters]="ownerFilters" (nzFilterChange)="onOwnerFilterChange($event)">{{ '::OwnerId' | abpLocalization }}</th>
+        <th nzWidth="110px" nzShowSort [nzSortFn]="sortByOwnerTeamName">{{ '::OwnerTeamId' | abpLocalization }}</th>
+        <th nzWidth="100px">{{ '::CreatorName' | abpLocalization }}</th>
+        <th nzWidth="150px" nzShowSort [nzSortFn]="sortByCreationTime">{{ '::CreationTime' | abpLocalization }}</th>
+        <th nzWidth="100px">{{ '::LastModifierName' | abpLocalization }}</th>
+        <th nzWidth="150px">{{ '::LastModificationTime' | abpLocalization }}</th>
+        <th nzWidth="90px" nzRight>{{ '::Actions' | abpLocalization }}</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let row of uploadFileTable.data">
-        <!-- 文件名称 -->
         <td>{{ row.name }}</td>
-        <!-- 实体名称 -->
         <td>{{ row.entityName }}</td>
-        <!-- 记录ID -->
         <td>{{ row.recordId }}</td>
-        <!-- 文件类型 -->
         <td>
           <nz-tag [nzColor]="'blue'">{{ row.type }}</nz-tag>
         </td>
-        <!-- 文件路径 -->
         <td>{{ row.path }}</td>
-        <!-- 操作列：hover触发编辑和删除下拉菜单 -->
-        <td>
+        <td>{{ row.ownerName }}</td>
+        <td>{{ row.ownerTeamName }}</td>
+        <td>{{ row.creatorName }}</td>
+        <td>{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</td>
+        <td>{{ row.lastModifierName }}</td>
+        <td>{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</td>
+        <td nzRight>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
             {{ '::Actions' | abpLocalization }}
@@ -118,7 +125,6 @@
       <div nz-row [nzGutter]="16">
         <!-- 左列 -->
         <div nz-col [nzSpan]="12">
-          <!-- 文件名称输入框 -->
           <nz-form-item>
             <nz-form-label nzRequired nzFor="upload-file-name">{{ '::Name' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="nameErrorTpl">
@@ -128,8 +134,6 @@
               </ng-template>
             </nz-form-control>
           </nz-form-item>
-
-          <!-- 实体名称输入框 -->
           <nz-form-item>
             <nz-form-label nzRequired nzFor="upload-file-entity-name">{{ '::EntityName' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="entityNameErrorTpl">
@@ -139,8 +143,6 @@
               </ng-template>
             </nz-form-control>
           </nz-form-item>
-
-          <!-- 记录ID输入框 -->
           <nz-form-item>
             <nz-form-label nzRequired nzFor="upload-file-record-id">{{ '::RecordId' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="recordIdErrorTpl">
@@ -150,11 +152,17 @@
               </ng-template>
             </nz-form-control>
           </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzFor="upload-file-ownerId">{{ '::OwnerId' | abpLocalization }}</nz-form-label>
+            <nz-form-control>
+              <nz-select id="upload-file-ownerId" formControlName="ownerId" nzPlaceHolder="选择负责人" nzShowSearch nzAllowClear>
+                <nz-option *ngFor="let owner of owners" [nzValue]="owner.id" [nzLabel]="owner.name"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
         </div>
-
         <!-- 右列 -->
         <div nz-col [nzSpan]="12">
-          <!-- 文件类型输入框 -->
           <nz-form-item>
             <nz-form-label nzRequired nzFor="upload-file-type">{{ '::FileType' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="typeErrorTpl">
@@ -164,8 +172,6 @@
               </ng-template>
             </nz-form-control>
           </nz-form-item>
-
-          <!-- 文件路径输入框 -->
           <nz-form-item>
             <nz-form-label nzRequired nzFor="upload-file-path">{{ '::FilePath' | abpLocalization }}</nz-form-label>
             <nz-form-control [nzErrorTip]="pathErrorTpl">
@@ -173,6 +179,14 @@
               <ng-template #pathErrorTpl let-control>
                 <ng-container *ngIf="control.hasError('required')">{{ '::FilePath' | abpLocalization }} is required</ng-container>
               </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzFor="upload-file-ownerTeamId">{{ '::OwnerTeamId' | abpLocalization }}</nz-form-label>
+            <nz-form-control>
+              <nz-select id="upload-file-ownerTeamId" formControlName="ownerTeamId" nzPlaceHolder="选择负责团队" nzShowSearch nzAllowClear>
+                <nz-option *ngFor="let team of teams" [nzValue]="team.id" [nzLabel]="team.name"></nz-option>
+              </nz-select>
             </nz-form-control>
           </nz-form-item>
         </div>

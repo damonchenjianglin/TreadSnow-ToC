@@ -25,6 +25,19 @@ public class TreadSnowPermissionDefinitionProvider : PermissionDefinitionProvide
         uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Create, L("Permission:UploadFiles.Create"));
         uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Edit, L("Permission:UploadFiles.Edit"));
         uploadFilesPermission.AddChild(TreadSnowPermissions.UploadFiles.Delete, L("Permission:UploadFiles.Delete"));
+
+        var departmentsPermission = myGroup.AddPermission(TreadSnowPermissions.Departments.Default, L("Permission:Departments"));
+        departmentsPermission.AddChild(TreadSnowPermissions.Departments.Create, L("Permission:Departments.Create"));
+        departmentsPermission.AddChild(TreadSnowPermissions.Departments.Edit, L("Permission:Departments.Edit"));
+        departmentsPermission.AddChild(TreadSnowPermissions.Departments.Delete, L("Permission:Departments.Delete"));
+
+        var teamsPermission = myGroup.AddPermission(TreadSnowPermissions.Teams.Default, L("Permission:Teams"));
+        teamsPermission.AddChild(TreadSnowPermissions.Teams.Create, L("Permission:Teams.Create"));
+        teamsPermission.AddChild(TreadSnowPermissions.Teams.Edit, L("Permission:Teams.Edit"));
+        teamsPermission.AddChild(TreadSnowPermissions.Teams.Delete, L("Permission:Teams.Delete"));
+
+        var dataPermissionsPermission = myGroup.AddPermission(TreadSnowPermissions.DataPermissions.Default, L("Permission:DataPermissions"));
+        dataPermissionsPermission.AddChild(TreadSnowPermissions.DataPermissions.Manage, L("Permission:DataPermissions.Manage"));
     }
 
     private static LocalizableString L(string name)

@@ -1,0 +1,43 @@
+/* 菜单权限组件样式 */
+.perm-container {
+  min-height: 200px;
+}
+
+.perm-header {
+  padding: 4px 0;
+}
+
+.group-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.group-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  &.active {
+    background: #e6f7ff;
+    color: #1890ff;
+    font-weight: 500;
+  }
+}
+
+.group-check-all {
+  padding: 2px 0;
+  font-weight: 500;
+}
+
+.perm-item {
+  padding: 3px 0;
+  font-size: 13px;
+}

@@ -1,0 +1,113 @@
+<!-- 团队管理列表页面 -->
+<nz-card [nzTitle]="cardTitle">
+  <ng-template #cardTitle>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button *abpPermission="'TreadSnow.Teams.Create'" nz-button nzType="primary" (click)="createTeam()">
+        <span>{{ '::NewTeam' | abpLocalization }}</span>
+      </button>
+    </div>
+  </ng-template>
+
+  <nz-table
+    #teamTable
+    nzShowPagination
+    nzShowSizeChanger
+    [nzData]="teams.items"
+    [nzTotal]="teams.totalCount"
+    [nzPageSize]="list.maxResultCount"
+    [nzPageIndex]="currentPage"
+    [nzFrontPagination]="false"
+    [nzLoading]="loading"
+    (nzPageIndexChange)="onPageIndexChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)"
+  >
+    <thead>
+      <tr>
+        <th nzShowSort [nzSortFn]="sortByNo">{{ '::No' | abpLocalization }}</th>
+        <th nzShowSort [nzSortFn]="sortByName" [nzCustomFilter]="true">
+          {{ '::Name' | abpLocalization }}
+          <nz-filter-trigger [nzVisible]="nameFilterVisible" [nzActive]="!!nameFilter" [nzDropdownMenu]="nameFilterMenu" (nzVisibleChange)="nameFilterVisible = $event">
+            <span nz-icon nzType="search"></span>
+          </nz-filter-trigger>
+        </th>
+        <th>{{ '::DepartmentName' | abpLocalization }}</th>
+        <th nzWidth="120px">{{ '::Actions' | abpLocalization }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of teamTable.data">
+        <td>{{ row.no }}</td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.departmentName }}</td>
+        <td>
+          <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
+            <span nz-icon nzType="setting" nzTheme="outline"></span>
+            {{ '::Actions' | abpLocalization }}
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actionMenu="nzDropdownMenu">
+            <ul nz-menu>
+              <li *abpPermission="'TreadSnow.Teams.Edit'" nz-menu-item (click)="editTeam(row.id)">
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+                {{ '::Edit' | abpLocalization }}
+              </li>
+              <li *abpPermission="'TreadSnow.Teams.Delete'" nz-menu-item nzDanger (click)="deleteTeam(row.id)">
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+                {{ '::Delete' | abpLocalization }}
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-card>
+
+<!-- 名称列筛选下拉菜单 -->
+<nz-dropdown-menu #nameFilterMenu="nzDropdownMenu">
+  <div style="padding: 8px;">
+    <input nz-input placeholder="搜索名称" [(ngModel)]="nameFilter" (keyup.enter)="onNameFilterSearch()" style="width: 180px; margin-bottom: 8px; display: block;" />
+    <div style="display: flex; justify-content: space-between;">
+      <button nz-button nzSize="small" nzType="primary" (click)="onNameFilterSearch()">确定</button>
+      <button nz-button nzSize="small" (click)="onNameFilterReset()">重置</button>
+    </div>
+  </div>
+</nz-dropdown-menu>
+
+<!-- 新增/编辑团队弹窗 -->
+<nz-modal
+  [(nzVisible)]="isModalOpen"
+  [nzTitle]="(selectedTeam.id ? '::Edit' : '::NewTeam') | abpLocalization"
+  [nzOkText]="'::Save' | abpLocalization"
+  [nzCancelText]="null"
+  [nzOkDisabled]="form?.invalid"
+  nzWidth="480px"
+  (nzOnOk)="save()"
+  (nzOnCancel)="closeModal()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="team-name">{{ '::Name' | abpLocalization }}</nz-form-label>
+        <nz-form-control>
+          <input nz-input id="team-name" formControlName="name" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzFor="team-dept">{{ '::DepartmentName' | abpLocalization }}</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="departmentId" nzAllowClear nzPlaceHolder="请选择所属部门">
+            <nz-option *ngFor="let dept of allDepartments" [nzValue]="dept.id" [nzLabel]="dept.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <!-- 团队角色分配 -->
+    <nz-divider [nzText]="'::TeamRoles' | abpLocalization"></nz-divider>
+    <div style="padding: 0 4px;">
+      <div *ngFor="let role of assignableRoles" style="margin-bottom: 10px;">
+        <label nz-checkbox [(ngModel)]="roleCheckedMap[role.name!]" [ngModelOptions]="{standalone: true}">{{ role.name }}</label>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>

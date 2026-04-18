@@ -32,5 +32,55 @@ namespace TreadSnow.Pets
         /// 主人名称（关联查询）
         /// </summary>
         public string? AccountName { get; set; }
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public Guid? OwnerId { get; set; }
+
+        /// <summary>
+        /// 负责团队Id
+        /// </summary>
+        public Guid? OwnerTeamId { get; set; }
+
+        /// <summary>
+        /// 负责人名称（关联查询）
+        /// </summary>
+        public string? OwnerName { get; set; }
+
+        /// <summary>
+        /// 负责团队名称（关联查询）
+        /// </summary>
+        public string? OwnerTeamName { get; set; }
+
+        /// <summary>
+        /// 创建人Id
+        /// </summary>
+        public Guid? CreatorId { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreationTime { get; set; }
+
+        /// <summary>
+        /// 创建人名称（关联查询）
+        /// </summary>
+        public string? CreatorName { get; set; }
+
+        /// <summary>
+        /// 最后修改人Id
+        /// </summary>
+        public Guid? LastModifierId { get; set; }
+
+        /// <summary>
+        /// 最后修改时间
+        /// </summary>
+        public DateTime? LastModificationTime { get; set; }
+
+        /// <summary>
+        /// 最后修改人名称（关联查询）
+        /// </summary>
+        public string? LastModifierName { get; set; }
     }
 }

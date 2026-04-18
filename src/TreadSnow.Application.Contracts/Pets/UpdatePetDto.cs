@@ -10,5 +10,15 @@ namespace TreadSnow.Pets
 
         [Required]
         public Guid AccountId { get; set; }
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public Guid? OwnerId { get; set; }
+
+        /// <summary>
+        /// 负责团队Id
+        /// </summary>
+        public Guid? OwnerTeamId { get; set; }
     }
 }

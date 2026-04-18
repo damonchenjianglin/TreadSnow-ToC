@@ -18,5 +18,15 @@ namespace TreadSnow.Accounts
         public string OpenId { get; set; } = string.Empty;
 
         public string? Description { get; set; }
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public Guid? OwnerId { get; set; }
+
+        /// <summary>
+        /// 负责团队Id
+        /// </summary>
+        public Guid? OwnerTeamId { get; set; }
     }
 }

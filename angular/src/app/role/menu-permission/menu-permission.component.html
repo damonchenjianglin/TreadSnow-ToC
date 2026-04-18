@@ -1,0 +1,36 @@
+<!-- 菜单权限配置组件（内联在tab中） -->
+<nz-spin [nzSpinning]="loading">
+  <div class="perm-container" *ngIf="groups.length > 0">
+    <!-- 全选 -->
+    <div class="perm-header">
+      <label nz-checkbox [nzChecked]="allGranted" (nzCheckedChange)="toggleAll($event)">授予所有权限</label>
+    </div>
+    <nz-divider style="margin: 8px 0;"></nz-divider>
+    <!-- 权限组 + 权限项 左右布局 -->
+    <div nz-row [nzGutter]="16">
+      <!-- 左侧：权限组列表 -->
+      <div nz-col [nzSpan]="8">
+        <div class="group-label">权限组</div>
+        <div *ngFor="let group of groups; let i = index"
+          class="group-item"
+          [class.active]="selectedGroupIndex === i"
+          (click)="selectGroup(i)">
+          {{ group.displayName }}
+        </div>
+      </div>
+      <!-- 右侧：当前组的权限项 -->
+      <div nz-col [nzSpan]="16">
+        <div *ngIf="groups[selectedGroupIndex] as group">
+          <div class="group-check-all">
+            <label nz-checkbox [nzChecked]="currentGroupAllGranted" [nzIndeterminate]="currentGroupIndeterminate" (nzCheckedChange)="toggleGroupAll($event)">全选</label>
+          </div>
+          <nz-divider style="margin: 4px 0 8px;"></nz-divider>
+          <div *ngFor="let perm of group.permissions" class="perm-item" [style.padding-left.px]="16 + perm.level * 20">
+            <label nz-checkbox [nzChecked]="perm.isGranted" (nzCheckedChange)="togglePermission(perm)">{{ perm.displayName }}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nz-empty *ngIf="!loading && groups.length === 0" nzNotFoundContent="暂无权限配置"></nz-empty>
+</nz-spin>

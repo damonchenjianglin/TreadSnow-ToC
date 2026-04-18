@@ -19,5 +19,15 @@ namespace TreadSnow.UploadFiles
 
         [Required]
         public string Path { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public Guid? OwnerId { get; set; }
+
+        /// <summary>
+        /// 负责团队Id
+        /// </summary>
+        public Guid? OwnerTeamId { get; set; }
     }
 }

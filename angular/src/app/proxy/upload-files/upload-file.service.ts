@@ -1,6 +1,6 @@
-import type { UploadFileDto, CreateUploadFileDto, UpdateUploadFileDto } from './models';
+import type { UploadFileDto, CreateUploadFileDto, UpdateUploadFileDto, UserLookupDto, TeamLookupDto } from './models';
 import { RestService } from '@abp/ng.core';
-import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
+import type { ListResultDto, PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
 /**
@@ -48,15 +48,15 @@ export class UploadFileService {
     }, { apiName: this.apiName });
 
   /**
-   * 获取附件分页列表（需传EntityName和RecordId筛选）
-   * @param input 分页排序请求参数（含entityName和recordId）
+   * 获取附件分页列表（支持entityName、recordId、ownerId筛选）
+   * @param input 分页排序请求参数
    * @returns 分页结果
    */
-  getList = (input: PagedAndSortedResultRequestDto & { entityName?: string; recordId?: string }) =>
+  getList = (input: PagedAndSortedResultRequestDto & { entityName?: string; recordId?: string; ownerId?: string }) =>
     this.restService.request<any, PagedResultDto<UploadFileDto>>({
       method: 'GET',
       url: '/api/app/upload-file',
-      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount, entityName: input.entityName, recordId: input.recordId },
+      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount, entityName: input.entityName, recordId: input.recordId, ownerId: input.ownerId },
     }, { apiName: this.apiName });
 
   /**
@@ -70,6 +70,26 @@ export class UploadFileService {
       method: 'PUT',
       url: `/api/app/upload-file/${id}`,
       body: input,
+    }, { apiName: this.apiName });
+
+  /**
+   * 获取用户下拉列表（用于选择负责人）
+   * @returns 用户Id和名称列表
+   */
+  getOwnerLookup = () =>
+    this.restService.request<any, ListResultDto<UserLookupDto>>({
+      method: 'GET',
+      url: '/api/app/upload-file/owner-lookup',
+    }, { apiName: this.apiName });
+
+  /**
+   * 获取团队下拉列表（用于选择负责团队）
+   * @returns 团队Id和名称列表
+   */
+  getTeamLookup = () =>
+    this.restService.request<any, ListResultDto<TeamLookupDto>>({
+      method: 'GET',
+      url: '/api/app/upload-file/team-lookup',
     }, { apiName: this.apiName });
 
   constructor(private restService: RestService) {}

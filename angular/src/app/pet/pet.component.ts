@@ -1,9 +1,9 @@
-import { ListService, PagedResultDto } from '@abp/ng.core';
+import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
 import * as XLSX from 'xlsx';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { PetService, PetDto } from '../proxy/pets';
+import { PetService, PetDto, UserLookupDto, TeamLookupDto } from '../proxy/pets';
 
 /**
  * 宠物列表组件
@@ -35,14 +35,29 @@ export class PetComponent implements OnInit {
   /** 当前页码 */
   currentPage = 1;
 
+  /** 当前登录用户ID */
+  currentUserId = '';
+
   /** 会员下拉列表数据（用于选择主人） */
   accounts: { id?: string; name?: string }[] = [];
+
+  /** 用户下拉列表数据（用于选择负责人） */
+  owners: UserLookupDto[] = [];
+
+  /** 团队下拉列表数据（用于选择负责团队） */
+  teams: TeamLookupDto[] = [];
 
   /** 主人筛选项列表（用于表格漏斗筛选） */
   accountFilters: { text: string; value: string }[] = [];
 
   /** 主人筛选函数 */
   accountFilterFn = (selectedValues: string[], item: PetDto) => selectedValues.includes(item.accountName ?? '');
+
+  /** 负责人筛选值 */
+  ownerFilter: string | null = null;
+
+  /** 负责人筛选项列表 */
+  ownerFilters: { text: string; value: string }[] = [];
 
   /** 名称列筛选关键词 */
   nameFilter = '';
@@ -59,27 +74,44 @@ export class PetComponent implements OnInit {
   /** 按主人名称排序函数 */
   sortByAccountName = (a: PetDto, b: PetDto) => (a.accountName ?? '').localeCompare(b.accountName ?? '');
 
-  constructor(public readonly list: ListService, private petService: PetService, private fb: FormBuilder, private confirmation: ConfirmationService) {}
+  /** 按负责人排序函数 */
+  sortByOwnerName = (a: PetDto, b: PetDto) => (a.ownerName ?? '').localeCompare(b.ownerName ?? '');
+
+  /** 按负责团队排序函数 */
+  sortByOwnerTeamName = (a: PetDto, b: PetDto) => (a.ownerTeamName ?? '').localeCompare(b.ownerTeamName ?? '');
+
+  /** 按创建时间排序函数 */
+  sortByCreationTime = (a: PetDto, b: PetDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
+
+  constructor(public readonly list: ListService, private petService: PetService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
 
   ngOnInit() {
-    /** 定义数据查询流，传入name模糊筛选 */
+    this.currentUserId = this.configState.getDeep('currentUser.id') || '';
+
+    /** 定义数据查询流，传入name模糊筛选和负责人筛选 */
     const petStreamCreator = (query: any) =>
-      this.petService.getList({ ...query, name: this.nameFilter || undefined });
+      this.petService.getList({ ...query, name: this.nameFilter || undefined, ownerId: this.ownerFilter || undefined });
 
     this.list.hookToQuery(petStreamCreator).subscribe((response) => {
       this.pet = response;
       this.loading = false;
     });
 
-    // 加载会员下拉列表
-    this.loadAccounts();
+    this.loadLookups();
   }
 
-  /** 加载会员下拉列表数据 */
-  loadAccounts() {
+  /** 加载所有下拉列表数据 */
+  loadLookups() {
     this.petService.getAccountLookup().subscribe((response) => {
       this.accounts = response.items ?? [];
       this.accountFilters = (response.items ?? []).map((a) => ({ text: a.name ?? '', value: a.name ?? '' }));
+    });
+    this.petService.getOwnerLookup().subscribe((res) => {
+      this.owners = res.items ?? [];
+      this.ownerFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.id ?? '' }));
+    });
+    this.petService.getTeamLookup().subscribe((res) => {
+      this.teams = res.items ?? [];
     });
   }
 
@@ -93,6 +125,15 @@ export class PetComponent implements OnInit {
   onNameFilterReset() {
     this.nameFilter = '';
     this.nameFilterVisible = false;
+    this.list.get();
+  }
+
+  /**
+   * 负责人列筛选变更回调
+   * @param selectedValues 选中的筛选值
+   */
+  onOwnerFilterChange(selectedValues: string[]) {
+    this.ownerFilter = selectedValues.length > 0 ? selectedValues[0] : null;
     this.list.get();
   }
 
@@ -132,6 +173,8 @@ export class PetComponent implements OnInit {
     this.form = this.fb.group({
       name: [this.selectedPet.name || '', Validators.required],
       accountId: [this.selectedPet.accountId || null, Validators.required],
+      ownerId: [this.selectedPet.ownerId || this.currentUserId || null],
+      ownerTeamId: [this.selectedPet.ownerTeamId || null],
     });
   }
 
@@ -200,7 +243,7 @@ export class PetComponent implements OnInit {
    * @param filename 文件名前缀
    */
   private downloadXlsx(data: PetDto[], filename: string) {
-    const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '主人': d.accountName ?? '' }));
+    const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '主人': d.accountName ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '宠物');

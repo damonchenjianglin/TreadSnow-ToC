@@ -3,7 +3,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { RoleRoutingModule } from './role-routing.module';
 import { RoleComponent } from './role.component';
-import { PermissionManagementModule } from '@abp/ng.permission-management';
+import { DataPermissionModalComponent } from './data-permission-modal/data-permission-modal.component';
+import { MenuPermissionComponent } from './menu-permission/menu-permission.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -15,16 +16,20 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
-/** 角色-菜单权限模块 */
+/** 角色管理模块 */
 @NgModule({
-  declarations: [RoleComponent],
+  declarations: [RoleComponent, DataPermissionModalComponent, MenuPermissionComponent],
   imports: [
     RoleRoutingModule,
     SharedModule,
     FormsModule,
     ReactiveFormsModule,
-    PermissionManagementModule,
     NzTableModule,
     NzButtonModule,
     NzIconModule,
@@ -36,6 +41,11 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     NzTagModule,
     NzMenuModule,
     NzCheckboxModule,
+    NzTabsModule,
+    NzSpinModule,
+    NzDividerModule,
+    NzGridModule,
+    NzEmptyModule,
   ],
 })
 export class RoleModule {}

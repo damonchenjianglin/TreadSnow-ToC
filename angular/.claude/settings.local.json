@@ -5,7 +5,26 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(xargs grep *)",
-      "Bash(dotnet build *)"
+      "Bash(dotnet build *)",
+      "Bash(dotnet watch *)",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet run *)",
+      "Bash(dotnet test *)",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_evaluate",
+      "Bash(curl -sk https://localhost:44312/swagger/v1/swagger.json)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(p\\) for p in d['paths'] if 'permission' in p.lower\\(\\)]\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(p\\) for p in d['paths'] if 'permission' in p.lower\\(\\)]\")",
+      "Bash(curl -sk \"https://localhost:44312/swagger/v1/swagger.json\")",
+      "Read(//tmp/**)",
+      "Bash(grep -E \"\\\\.\\(cs|ts\\)$\")"
+    ],
+    "additionalDirectories": [
+      "e:\\TreadSnow\\TreadSnow Github2"
     ]
   }
 }

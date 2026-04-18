@@ -62,7 +62,7 @@
         "FilePath": "文件路径",
 
         "Menu:Users": "用户",
-        "Menu:RolesPermissions": "角色-菜单权限",
+        "Menu:RolesPermissions": "角色",
         "Menu:Tenants": "租户",
         "NewUser": "新增用户",
         "NewRole": "新增角色",
@@ -86,6 +86,43 @@
         "PhoneNumber": "手机号码",
         "RoleName": "角色名称",
         "TenantName": "租户名称",
-        "Save": "保存"
+        "Save": "保存",
+
+        "Menu:Departments": "部门管理",
+        "NewDepartment": "新增部门",
+        "ParentDepartment": "上级部门",
+        "Permission:Departments": "部门管理",
+        "Permission:Departments.Create": "新增部门",
+        "Permission:Departments.Edit": "编辑部门",
+        "Permission:Departments.Delete": "删除部门",
+
+        "Menu:Teams": "团队管理",
+        "NewTeam": "新增团队",
+        "DepartmentName": "所属部门",
+        "Permission:Teams": "团队管理",
+        "Permission:Teams.Create": "新增团队",
+        "Permission:Teams.Edit": "编辑团队",
+        "Permission:Teams.Delete": "删除团队",
+
+        "Permission:DataPermissions": "数据权限",
+        "Permission:DataPermissions.Manage": "管理数据权限",
+        "DataPermission": "数据权限",
+        "MenuPermission": "菜单权限",
+        "ReadLevel": "读",
+        "WriteLevel": "写",
+        "DeleteLevel": "删除",
+        "DataPermissionLevel:None": "无权限",
+        "DataPermissionLevel:Personal": "个人",
+        "DataPermissionLevel:Department": "部门",
+        "DataPermissionLevel:DepartmentAndChildren": "部门及下级",
+        "DataPermissionLevel:Organization": "组织",
+        "OwnerId": "负责人",
+        "OwnerTeamId": "负责团队",
+        "TeamMembers": "团队成员",
+        "TeamRoles": "团队角色",
+        "CreatorName": "创建人",
+        "CreationTime": "创建时间",
+        "LastModifierName": "修改人",
+        "LastModificationTime": "修改时间"
     }
 }

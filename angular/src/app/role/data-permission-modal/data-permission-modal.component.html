@@ -1,0 +1,54 @@
+<!-- 数据权限配置表格 -->
+<nz-table #permTable [nzData]="configs" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="middle" nzBordered>
+  <thead>
+    <tr>
+      <th>{{ '::Name' | abpLocalization }}</th>
+      <th nzAlign="center">{{ '::ReadLevel' | abpLocalization }}</th>
+      <th nzAlign="center">{{ '::WriteLevel' | abpLocalization }}</th>
+      <th nzAlign="center">{{ '::DeleteLevel' | abpLocalization }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let config of configs; let i = index">
+      <td>{{ entityList[i].labelKey | abpLocalization }}</td>
+      <td nzAlign="center">
+        <button
+          nz-button nzShape="circle" nzSize="small" class="level-btn"
+          [style.background-color]="getLevelColor(config.readLevel)"
+          [style.border-color]="getLevelColor(config.readLevel)"
+          [style.color]="config.readLevel === 0 ? '#999' : '#fff'"
+          (click)="cycleLevel(config, 'readLevel')">
+          {{ config.readLevel }}
+        </button>
+      </td>
+      <td nzAlign="center">
+        <button
+          nz-button nzShape="circle" nzSize="small" class="level-btn"
+          [style.background-color]="getLevelColor(config.writeLevel)"
+          [style.border-color]="getLevelColor(config.writeLevel)"
+          [style.color]="config.writeLevel === 0 ? '#999' : '#fff'"
+          (click)="cycleLevel(config, 'writeLevel')">
+          {{ config.writeLevel }}
+        </button>
+      </td>
+      <td nzAlign="center">
+        <button
+          nz-button nzShape="circle" nzSize="small" class="level-btn"
+          [style.background-color]="getLevelColor(config.deleteLevel)"
+          [style.border-color]="getLevelColor(config.deleteLevel)"
+          [style.color]="config.deleteLevel === 0 ? '#999' : '#fff'"
+          (click)="cycleLevel(config, 'deleteLevel')">
+          {{ config.deleteLevel }}
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<!-- 权限等级颜色说明（简洁一行式） -->
+<div class="level-legend">
+  <span *ngFor="let item of levelConfig" class="legend-item">
+    <span class="legend-dot" [style.background-color]="item.color"></span>
+    <span class="legend-label">{{ item.label }}</span>
+  </span>
+</div>

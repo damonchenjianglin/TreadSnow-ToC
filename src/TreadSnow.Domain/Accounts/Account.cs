@@ -43,5 +43,15 @@ namespace TreadSnow.Accounts
         /// 描述
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public Guid? OwnerId { get; set; }
+
+        /// <summary>
+        /// 负责团队Id
+        /// </summary>
+        public Guid? OwnerTeamId { get; set; }
     }
 }

@@ -40,22 +40,24 @@
     [nzPageIndex]="currentPage"
     [nzFrontPagination]="false"
     [nzLoading]="loading"
+    [nzScroll]="{ x: '900px' }"
     (nzPageIndexChange)="onPageIndexChange($event)"
     (nzPageSizeChange)="onPageSizeChange($event)"
   >
     <thead>
       <tr>
         <!-- 用户名列：带放大镜筛选 -->
-        <th nzShowSort [nzSortFn]="sortByUserName" [nzCustomFilter]="true">
+        <th nzWidth="150px" nzShowSort [nzSortFn]="sortByUserName" [nzCustomFilter]="true">
           {{ '::UserName' | abpLocalization }}
           <nz-filter-trigger [nzVisible]="userNameFilterVisible" [nzActive]="!!userNameFilter" [nzDropdownMenu]="userNameFilterMenu" (nzVisibleChange)="userNameFilterVisible = $event">
             <span nz-icon nzType="search"></span>
           </nz-filter-trigger>
         </th>
-        <th nzShowSort [nzSortFn]="sortByEmail">{{ '::Email' | abpLocalization }}</th>
-        <th nzShowSort [nzSortFn]="sortByPhone">{{ '::PhoneNumber' | abpLocalization }}</th>
-        <th>{{ '::OpenId' | abpLocalization }}</th>
-        <th nzWidth="150px">{{ '::Actions' | abpLocalization }}</th>
+        <th nzWidth="120px" nzShowFilter [nzFilters]="departmentFilters" [nzFilterFn]="departmentFilterFn">{{ '::DepartmentName' | abpLocalization }}</th>
+        <th nzWidth="180px" nzShowSort [nzSortFn]="sortByEmail">{{ '::Email' | abpLocalization }}</th>
+        <th nzWidth="130px" nzShowSort [nzSortFn]="sortByPhone">{{ '::PhoneNumber' | abpLocalization }}</th>
+        <th nzWidth="130px">{{ '::OpenId' | abpLocalization }}</th>
+        <th nzWidth="90px" nzRight>{{ '::Actions' | abpLocalization }}</th>
       </tr>
     </thead>
     <tbody>
@@ -63,10 +65,11 @@
         <td>
           <nz-badge [nzStatus]="row.isActive ? 'success' : 'error'" nzText="{{ row.userName }}"></nz-badge>
         </td>
+        <td>{{ getDepartmentName(row.extraProperties?.DepartmentId) }}</td>
         <td>{{ row.email }}</td>
         <td>{{ row.phoneNumber }}</td>
         <td>{{ row.extraProperties?.OpenId }}</td>
-        <td>
+        <td nzRight>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
             {{ '::Actions' | abpLocalization }}
@@ -163,6 +166,14 @@
                 <nz-form-label nzFor="user-openid">{{ '::OpenId' | abpLocalization }}</nz-form-label>
                 <nz-form-control>
                   <input nz-input id="user-openid" formControlName="openId" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzFor="user-departmentId">{{ '::DepartmentName' | abpLocalization }}</nz-form-label>
+                <nz-form-control>
+                  <nz-select id="user-departmentId" formControlName="departmentId" nzPlaceHolder="选择部门" nzShowSearch nzAllowClear>
+                    <nz-option *ngFor="let dept of departments" [nzValue]="dept.id" [nzLabel]="dept.name"></nz-option>
+                  </nz-select>
                 </nz-form-control>
               </nz-form-item>
               <nz-form-item>

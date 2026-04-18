@@ -55,7 +55,7 @@
         "Welcome": "Welcome",
 
         "Menu:Users": "Users",
-        "Menu:RolesPermissions": "Role-Menu Permissions",
+        "Menu:RolesPermissions": "Role",
         "Menu:Tenants": "Tenants",
         "NewUser": "New User",
         "NewRole": "New Role",
@@ -79,6 +79,43 @@
         "PhoneNumber": "Phone Number",
         "RoleName": "Role Name",
         "TenantName": "Tenant Name",
-        "Save": "Save"
+        "Save": "Save",
+
+        "Menu:Departments": "Departments",
+        "NewDepartment": "New Department",
+        "ParentDepartment": "Parent Department",
+        "Permission:Departments": "Department Management",
+        "Permission:Departments.Create": "Creating new departments",
+        "Permission:Departments.Edit": "Editing departments",
+        "Permission:Departments.Delete": "Deleting departments",
+
+        "Menu:Teams": "Teams",
+        "NewTeam": "New Team",
+        "DepartmentName": "Department",
+        "Permission:Teams": "Team Management",
+        "Permission:Teams.Create": "Creating new teams",
+        "Permission:Teams.Edit": "Editing teams",
+        "Permission:Teams.Delete": "Deleting teams",
+
+        "Permission:DataPermissions": "Data Permissions",
+        "Permission:DataPermissions.Manage": "Managing data permissions",
+        "DataPermission": "Data Permission",
+        "MenuPermission": "Menu Permission",
+        "ReadLevel": "Read",
+        "WriteLevel": "Write",
+        "DeleteLevel": "Delete",
+        "DataPermissionLevel:None": "None",
+        "DataPermissionLevel:Personal": "Personal",
+        "DataPermissionLevel:Department": "Department",
+        "DataPermissionLevel:DepartmentAndChildren": "Dept & Children",
+        "DataPermissionLevel:Organization": "Organization",
+        "OwnerId": "Owner",
+        "OwnerTeamId": "Owner Team",
+        "TeamMembers": "Team Members",
+        "TeamRoles": "Team Roles",
+        "CreatorName": "Creator",
+        "CreationTime": "Creation Time",
+        "LastModifierName": "Modifier",
+        "LastModificationTime": "Modification Time"
     }
 }

@@ -2,11 +2,13 @@ import { ListService, PagedResultDto } from '@abp/ng.core';
 import { IdentityRoleService } from '@abp/ng.identity/proxy';
 import { IdentityRoleDto } from '@abp/ng.identity/proxy';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { DataPermissionModalComponent } from './data-permission-modal/data-permission-modal.component';
+import { MenuPermissionComponent } from './menu-permission/menu-permission.component';
 import * as XLSX from 'xlsx';
 
-/** 角色-菜单权限列表组件 */
+/** 角色列表组件 */
 @Component({
   standalone: false,
   selector: 'app-role',
@@ -14,6 +16,12 @@ import * as XLSX from 'xlsx';
   providers: [ListService],
 })
 export class RoleComponent implements OnInit {
+  /** 数据权限子组件引用 */
+  @ViewChild(DataPermissionModalComponent) dataPermissionModal!: DataPermissionModalComponent;
+
+  /** 菜单权限子组件引用 */
+  @ViewChild(MenuPermissionComponent) menuPermissionModal!: MenuPermissionComponent;
+
   /** 角色分页数据 */
   roles = { items: [], totalCount: 0 } as PagedResultDto<IdentityRoleDto>;
 
@@ -23,7 +31,7 @@ export class RoleComponent implements OnInit {
   /** 表单对象 */
   form!: FormGroup;
 
-  /** 弹窗是否可见 */
+  /** 新增/编辑弹窗是否可见 */
   isModalOpen = false;
 
   /** 数据加载状态 */
@@ -39,10 +47,25 @@ export class RoleComponent implements OnInit {
   nameFilterVisible = false;
 
   /** 权限管理弹窗是否可见 */
-  permissionVisible = false;
+  permissionModalVisible = false;
 
-  /** 权限管理的providerKey（角色名称） */
+  /** 权限管理弹窗对应的角色名称 */
+  permissionRoleName = '';
+
+  /** 权限管理tabs当前选中索引（0=菜单权限, 1=数据权限） */
+  permissionTabIndex = 0;
+
+  /** ABP菜单权限的providerKey（角色名称） */
   permissionProviderKey = '';
+
+  /** 数据权限对应的角色Id */
+  dataPermissionRoleId = '';
+
+  /** 菜单权限保存中状态 */
+  menuPermissionSaving = false;
+
+  /** 数据权限保存中状态 */
+  dataPermissionSaving = false;
 
   /** 按名称排序函数 */
   sortByName = (a: IdentityRoleDto, b: IdentityRoleDto) => (a.name ?? '').localeCompare(b.name ?? '');
@@ -123,13 +146,44 @@ export class RoleComponent implements OnInit {
     });
   }
 
-  /** 打开权限管理弹窗 */
-  openPermissions(role: IdentityRoleDto) {
+  /** 打开权限管理弹窗（含菜单权限和数据权限tabs） */
+  openPermissionModal(role: IdentityRoleDto) {
     this.permissionProviderKey = role.name!;
-    this.permissionVisible = true;
+    this.dataPermissionRoleId = role.id!;
+    this.permissionRoleName = role.name!;
+    this.permissionTabIndex = 0;
+    this.permissionModalVisible = true;
   }
 
-  /** 关闭弹窗 */
+  /** 关闭权限管理弹窗 */
+  closePermissionModal() {
+    this.permissionModalVisible = false;
+  }
+
+  /** 保存菜单权限 */
+  saveMenuPermission() {
+    this.menuPermissionSaving = true;
+    this.menuPermissionModal.save();
+    setTimeout(() => { this.menuPermissionSaving = false; }, 1500);
+  }
+
+  /** 保存数据权限 */
+  saveDataPermission() {
+    this.dataPermissionSaving = true;
+    this.dataPermissionModal.save();
+  }
+
+  /** 数据权限保存成功回调 */
+  onDataPermissionSaved() {
+    this.dataPermissionSaving = false;
+  }
+
+  /** 数据权限保存失败回调 */
+  onDataPermissionSaveFailed() {
+    this.dataPermissionSaving = false;
+  }
+
+  /** 关闭新增/编辑弹窗 */
   closeModal() {
     this.isModalOpen = false;
   }

@@ -1,9 +1,9 @@
-import { ListService, PagedResultDto } from '@abp/ng.core';
+import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
 import * as XLSX from 'xlsx';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { AccountService, AccountDto } from '../proxy/accounts';
+import { AccountService, AccountDto, UserLookupDto, TeamLookupDto } from '../proxy/accounts';
 
 /**
  * 会员列表组件
@@ -41,6 +41,21 @@ export class AccountComponent implements OnInit {
   /** 名称列筛选弹出框是否可见 */
   nameFilterVisible = false;
 
+  /** 负责人筛选值 */
+  ownerFilter: string | null = null;
+
+  /** 当前登录用户ID */
+  currentUserId = '';
+
+  /** 用户下拉列表数据（用于选择负责人） */
+  owners: UserLookupDto[] = [];
+
+  /** 团队下拉列表数据（用于选择负责团队） */
+  teams: TeamLookupDto[] = [];
+
+  /** 负责人筛选项列表（用于表格漏斗筛选） */
+  ownerFilters: { text: string; value: string }[] = [];
+
   /** 按编号排序函数 */
   sortByNo = (a: AccountDto, b: AccountDto) => a.no - b.no;
 
@@ -59,16 +74,40 @@ export class AccountComponent implements OnInit {
   /** 按描述排序函数 */
   sortByDescription = (a: AccountDto, b: AccountDto) => (a.description ?? '').localeCompare(b.description ?? '');
 
-  constructor(public readonly list: ListService, private accountService: AccountService, private fb: FormBuilder, private confirmation: ConfirmationService) {}
+  /** 按负责人排序函数 */
+  sortByOwnerName = (a: AccountDto, b: AccountDto) => (a.ownerName ?? '').localeCompare(b.ownerName ?? '');
+
+  /** 按负责团队排序函数 */
+  sortByOwnerTeamName = (a: AccountDto, b: AccountDto) => (a.ownerTeamName ?? '').localeCompare(b.ownerTeamName ?? '');
+
+  /** 按创建时间排序函数 */
+  sortByCreationTime = (a: AccountDto, b: AccountDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
+
+  constructor(public readonly list: ListService, private accountService: AccountService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
 
   ngOnInit() {
-    /** 定义数据查询流，传入name模糊筛选 */
+    this.currentUserId = this.configState.getDeep('currentUser.id') || '';
+
+    /** 定义数据查询流，传入name模糊筛选和负责人筛选 */
     const accountStreamCreator = (query: any) =>
-      this.accountService.getList({ ...query, name: this.nameFilter || undefined });
+      this.accountService.getList({ ...query, name: this.nameFilter || undefined, ownerId: this.ownerFilter || undefined });
 
     this.list.hookToQuery(accountStreamCreator).subscribe((response) => {
       this.account = response;
       this.loading = false;
+    });
+
+    this.loadLookups();
+  }
+
+  /** 加载负责人和团队下拉数据 */
+  loadLookups() {
+    this.accountService.getOwnerLookup().subscribe((res) => {
+      this.owners = res.items ?? [];
+      this.ownerFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.id ?? '' }));
+    });
+    this.accountService.getTeamLookup().subscribe((res) => {
+      this.teams = res.items ?? [];
     });
   }
 
@@ -82,6 +121,15 @@ export class AccountComponent implements OnInit {
   onNameFilterReset() {
     this.nameFilter = '';
     this.nameFilterVisible = false;
+    this.list.get();
+  }
+
+  /**
+   * 负责人列筛选变更回调
+   * @param selectedValues 选中的筛选值
+   */
+  onOwnerFilterChange(selectedValues: string[]) {
+    this.ownerFilter = selectedValues.length > 0 ? selectedValues[0] : null;
     this.list.get();
   }
 
@@ -124,6 +172,8 @@ export class AccountComponent implements OnInit {
       email: [this.selectedAccount.email || '', Validators.required],
       openId: [this.selectedAccount.openId || '', Validators.required],
       description: [this.selectedAccount.description || ''],
+      ownerId: [this.selectedAccount.ownerId || this.currentUserId || null],
+      ownerTeamId: [this.selectedAccount.ownerTeamId || null],
     });
   }
 
@@ -192,7 +242,7 @@ export class AccountComponent implements OnInit {
    * @param filename 文件名前缀
    */
   private downloadXlsx(data: AccountDto[], filename: string) {
-    const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '手机号码': d.phone ?? '', '邮箱': d.email ?? '', 'OpenId': d.openId ?? '', '描述': d.description ?? '' }));
+    const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '手机号码': d.phone ?? '', '邮箱': d.email ?? '', 'OpenId': d.openId ?? '', '描述': d.description ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '会员');

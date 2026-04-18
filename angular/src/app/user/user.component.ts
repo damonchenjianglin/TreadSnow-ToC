@@ -6,6 +6,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { DepartmentService, DepartmentDto } from '../proxy/departments';
 
 /** 用户管理列表组件 */
 @Component({
@@ -51,9 +52,20 @@ export class UserComponent implements OnInit {
   /** 角色勾选状态映射 */
   roleCheckedMap: { [roleName: string]: boolean } = {};
 
-
   /** 当前登录用户ID */
   currentUserId = '';
+
+  /** 部门下拉列表数据 */
+  departments: DepartmentDto[] = [];
+
+  /** 部门筛选项列表 */
+  departmentFilters: { text: string; value: string }[] = [];
+
+  /** 部门筛选值 */
+  departmentFilter: string | null = null;
+
+  /** 部门筛选函数（前端过滤） */
+  departmentFilterFn = (selectedValues: string[], item: IdentityUserDto) => selectedValues.includes((item as any).extraProperties?.DepartmentId ?? '');
 
   /** 按用户名排序函数 */
   sortByUserName = (a: IdentityUserDto, b: IdentityUserDto) => (a.userName ?? '').localeCompare(b.userName ?? '');
@@ -64,7 +76,7 @@ export class UserComponent implements OnInit {
   /** 按手机号排序函数 */
   sortByPhone = (a: IdentityUserDto, b: IdentityUserDto) => (a.phoneNumber ?? '').localeCompare(b.phoneNumber ?? '');
 
-  constructor(public readonly list: ListService, private userService: IdentityUserService, private roleService: IdentityRoleService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
+  constructor(public readonly list: ListService, private userService: IdentityUserService, private roleService: IdentityRoleService, private departmentService: DepartmentService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
 
   ngOnInit() {
     /* 获取当前登录用户ID */
@@ -80,6 +92,12 @@ export class UserComponent implements OnInit {
     /* 加载可分配角色列表 */
     this.userService.getAssignableRoles().subscribe((res) => {
       this.assignableRoles = res.items ?? [];
+    });
+
+    /* 加载部门列表 */
+    this.departmentService.getList({ maxResultCount: 1000 }).subscribe((res) => {
+      this.departments = res.items ?? [];
+      this.departmentFilters = this.departments.map((d) => ({ text: d.name ?? '', value: d.id ?? '' }));
     });
   }
 
@@ -133,6 +151,7 @@ export class UserComponent implements OnInit {
       email: [this.selectedUser.email || '', [Validators.required, Validators.email, Validators.maxLength(256)]],
       phoneNumber: [this.selectedUser.phoneNumber || '', Validators.maxLength(16)],
       openId: [(this.selectedUser as any).extraProperties?.OpenId || '', Validators.maxLength(128)],
+      departmentId: [(this.selectedUser as any).extraProperties?.DepartmentId || null],
       isActive: [this.selectedUser.id ? this.selectedUser.isActive : true],
       lockoutEnabled: [this.selectedUser.id ? this.selectedUser.lockoutEnabled : true],
     });
@@ -155,7 +174,7 @@ export class UserComponent implements OnInit {
         lockoutEnabled: val.lockoutEnabled,
         roleNames,
         concurrencyStamp: this.selectedUser.concurrencyStamp,
-        extraProperties: { OpenId: val.openId },
+        extraProperties: { OpenId: val.openId, DepartmentId: val.departmentId || null },
       };
       if (val.password) dto.password = val.password;
       this.userService.update(this.selectedUser.id, dto).subscribe(() => {
@@ -173,7 +192,7 @@ export class UserComponent implements OnInit {
         isActive: val.isActive,
         lockoutEnabled: val.lockoutEnabled,
         roleNames,
-        extraProperties: { OpenId: val.openId },
+        extraProperties: { OpenId: val.openId, DepartmentId: val.departmentId || null },
       };
       this.userService.create(dto).subscribe(() => {
         this.isModalOpen = false;
@@ -225,10 +244,22 @@ export class UserComponent implements OnInit {
     });
   }
 
+  /**
+   * 根据部门ID获取部门名称
+   * @param departmentId 部门ID
+   * @returns 部门名称
+   */
+  getDepartmentName(departmentId: string | null | undefined): string {
+    if (!departmentId) return '';
+    const dept = this.departments.find((d) => d.id === departmentId);
+    return dept?.name ?? '';
+  }
+
   /** 下载xlsx文件 */
   private downloadXlsx(data: IdentityUserDto[], filename: string) {
     const rows = data.map((d) => ({
       '用户名': d.userName ?? '',
+      '部门': this.getDepartmentName((d as any).extraProperties?.DepartmentId),
       '邮箱': d.email ?? '',
       '手机号码': d.phoneNumber ?? '',
       'OpenId': (d as any).extraProperties?.OpenId ?? '',

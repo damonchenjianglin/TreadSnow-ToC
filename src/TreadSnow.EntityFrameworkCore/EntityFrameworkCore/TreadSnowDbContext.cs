@@ -15,7 +15,10 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using TreadSnow.Accounts;
+using TreadSnow.DataPermissions;
+using TreadSnow.Departments;
 using TreadSnow.Pets;
+using TreadSnow.Teams;
 using TreadSnow.UploadFiles;
 
 namespace TreadSnow.EntityFrameworkCore;
@@ -34,6 +37,11 @@ public class TreadSnowDbContext :
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Pet> Pets { get; set; }
     public DbSet<UploadFile> UploadFiles { get; set; }
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<Team> Teams { get; set; }
+    public DbSet<TeamRole> TeamRoles { get; set; }
+    public DbSet<TeamUser> TeamUsers { get; set; }
+    public DbSet<RoleDataPermission> RoleDataPermissions { get; set; }
 
     #endregion 
 
@@ -126,6 +134,53 @@ public class TreadSnowDbContext :
             b.Property(x => x.Name).IsRequired().HasMaxLength(64); //����
             b.Property(x => x.Type).IsRequired().HasMaxLength(64); //�ļ�����
             b.Property(x => x.Path).IsRequired().HasMaxLength(1000); //·��
+        });
+
+        builder.Entity<Department>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "Departments", TreadSnowConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
+            b.Property(x => x.No).UseIdentityColumn(9000, 1);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64);
+            b.HasOne<Department>().WithMany().HasForeignKey(x => x.ParentDepartmentId);
+        });
+
+        builder.Entity<Team>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "Teams", TreadSnowConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
+            b.Property(x => x.No).UseIdentityColumn(1000, 1);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64);
+            b.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId);
+        });
+
+        builder.Entity<TeamRole>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "TeamRoles", TreadSnowConsts.DbSchema);
+            b.HasKey(x => new { x.TeamId, x.RoleId });
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
+            b.HasOne<Team>().WithMany().HasForeignKey(x => x.TeamId).IsRequired();
+            b.HasOne<IdentityRole>().WithMany().HasForeignKey(x => x.RoleId).IsRequired();
+        });
+
+        builder.Entity<TeamUser>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "TeamUsers", TreadSnowConsts.DbSchema);
+            b.HasKey(x => new { x.TeamId, x.UserId });
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
+            b.HasOne<Team>().WithMany().HasForeignKey(x => x.TeamId).IsRequired();
+            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.UserId).IsRequired();
+        });
+
+        builder.Entity<RoleDataPermission>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "RoleDataPermissions", TreadSnowConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
+            b.HasOne<IdentityRole>().WithMany().HasForeignKey(x => x.RoleId).IsRequired();
+            b.Property(x => x.ConfigJson).IsRequired();
         });
         #endregion
     }

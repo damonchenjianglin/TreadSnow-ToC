@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TreadSnow.Lookups;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 
@@ -52,5 +53,17 @@ namespace TreadSnow.Accounts
         /// </summary>
         /// <param name="id">会员Id</param>
         Task DeleteAsync(Guid id);
+
+        /// <summary>
+        /// 获取用户下拉列表（用于选择负责人）
+        /// </summary>
+        /// <returns>用户Id和名称列表</returns>
+        Task<ListResultDto<UserLookupDto>> GetOwnerLookupAsync();
+
+        /// <summary>
+        /// 获取团队下拉列表（用于选择负责团队）
+        /// </summary>
+        /// <returns>团队Id和名称列表</returns>
+        Task<ListResultDto<TeamLookupDto>> GetTeamLookupAsync();
     }
 }

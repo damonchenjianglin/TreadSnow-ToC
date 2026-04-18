@@ -1,8 +1,8 @@
-import { ListService, PagedResultDto } from '@abp/ng.core';
+import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { UploadFileService, UploadFileDto } from '../proxy/upload-files';
+import { UploadFileService, UploadFileDto, UserLookupDto, TeamLookupDto } from '../proxy/upload-files';
 
 /**
  * 附件列表组件
@@ -37,6 +37,21 @@ export class UploadFileComponent implements OnInit {
   /** 当前页码 */
   currentPage = 1;
 
+  /** 当前登录用户ID */
+  currentUserId = '';
+
+  /** 用户下拉列表数据（用于选择负责人） */
+  owners: UserLookupDto[] = [];
+
+  /** 团队下拉列表数据（用于选择负责团队） */
+  teams: TeamLookupDto[] = [];
+
+  /** 负责人筛选值 */
+  ownerFilter: string | null = null;
+
+  /** 负责人筛选项列表 */
+  ownerFilters: { text: string; value: string }[] = [];
+
   /** 按名称排序函数 */
   sortByName = (a: UploadFileDto, b: UploadFileDto) => (a.name ?? '').localeCompare(b.name ?? '');
 
@@ -52,17 +67,50 @@ export class UploadFileComponent implements OnInit {
   /** 按文件路径排序函数 */
   sortByPath = (a: UploadFileDto, b: UploadFileDto) => (a.path ?? '').localeCompare(b.path ?? '');
 
-  constructor(public readonly list: ListService, private uploadFileService: UploadFileService, private fb: FormBuilder, private confirmation: ConfirmationService) {}
+  /** 按负责人排序函数 */
+  sortByOwnerName = (a: UploadFileDto, b: UploadFileDto) => (a.ownerName ?? '').localeCompare(b.ownerName ?? '');
+
+  /** 按负责团队排序函数 */
+  sortByOwnerTeamName = (a: UploadFileDto, b: UploadFileDto) => (a.ownerTeamName ?? '').localeCompare(b.ownerTeamName ?? '');
+
+  /** 按创建时间排序函数 */
+  sortByCreationTime = (a: UploadFileDto, b: UploadFileDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
+
+  constructor(public readonly list: ListService, private uploadFileService: UploadFileService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
 
   ngOnInit() {
-    /** 定义数据查询流，列表页查所有附件，不传entityName和recordId */
+    this.currentUserId = this.configState.getDeep('currentUser.id') || '';
+
+    /** 定义数据查询流，列表页查所有附件，支持负责人筛选 */
     const uploadFileStreamCreator = (query: any) =>
-      this.uploadFileService.getList(query);
+      this.uploadFileService.getList({ ...query, ownerId: this.ownerFilter || undefined });
 
     this.list.hookToQuery(uploadFileStreamCreator).subscribe((response) => {
       this.uploadFile = response;
       this.loading = false;
     });
+
+    this.loadLookups();
+  }
+
+  /** 加载负责人和团队下拉数据 */
+  loadLookups() {
+    this.uploadFileService.getOwnerLookup().subscribe((res) => {
+      this.owners = res.items ?? [];
+      this.ownerFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.id ?? '' }));
+    });
+    this.uploadFileService.getTeamLookup().subscribe((res) => {
+      this.teams = res.items ?? [];
+    });
+  }
+
+  /**
+   * 负责人列筛选变更回调
+   * @param selectedValues 选中的筛选值
+   */
+  onOwnerFilterChange(selectedValues: string[]) {
+    this.ownerFilter = selectedValues.length > 0 ? selectedValues[0] : null;
+    this.list.get();
   }
 
   /** 打开新建附件弹窗 */
@@ -104,6 +152,8 @@ export class UploadFileComponent implements OnInit {
       name: [this.selectedUploadFile.name || '', Validators.required],
       type: [this.selectedUploadFile.type || '', Validators.required],
       path: [this.selectedUploadFile.path || '', Validators.required],
+      ownerId: [this.selectedUploadFile.ownerId || this.currentUserId || null],
+      ownerTeamId: [this.selectedUploadFile.ownerTeamId || null],
     });
   }
 
@@ -159,13 +209,11 @@ export class UploadFileComponent implements OnInit {
 
   /** 导出当前条件数据 */
   exportCurrent() {
-    // TODO: 对接后端导出接口，传入当前搜索条件
     console.warn('导出当前条件数据，搜索关键词:', this.searchText);
   }
 
   /** 导出所有数据 */
   exportAll() {
-    // TODO: 对接后端导出接口，不传筛选条件
     console.warn('导出所有数据');
   }
 }

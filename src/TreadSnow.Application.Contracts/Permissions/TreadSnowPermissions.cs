@@ -38,6 +38,34 @@ public static class TreadSnowPermissions
         public const string Delete = Default + ".Delete";
     }
 
-    //Add your own permission names. Example:
-    //public const string MyPermission1 = GroupName + ".MyPermission1";
+    /// <summary>
+    /// 部门权限
+    /// </summary>
+    public static class Departments
+    {
+        public const string Default = GroupName + ".Departments";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+    }
+
+    /// <summary>
+    /// 团队权限
+    /// </summary>
+    public static class Teams
+    {
+        public const string Default = GroupName + ".Teams";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+    }
+
+    /// <summary>
+    /// 数据权限配置权限
+    /// </summary>
+    public static class DataPermissions
+    {
+        public const string Default = GroupName + ".DataPermissions";
+        public const string Manage = Default + ".Manage";
+    }
 }

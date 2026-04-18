@@ -17,6 +17,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 /** 用户管理模块 */
 @NgModule({
@@ -40,6 +41,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
     NzCheckboxModule,
     NzSwitchModule,
     NzBadgeModule,
+    NzSelectModule,
   ],
 })
 export class UserModule {}

@@ -1,4 +1,4 @@
-<!-- 角色-菜单权限列表页面 -->
+<!-- 角色列表页面 -->
 <nz-card [nzTitle]="cardTitle">
   <ng-template #cardTitle>
     <div style="display: flex; align-items: center; gap: 8px;">
@@ -45,7 +45,6 @@
   >
     <thead>
       <tr>
-        <!-- 名称列：带放大镜筛选 -->
         <th nzShowSort [nzSortFn]="sortByName" [nzCustomFilter]="true">
           {{ '::RoleName' | abpLocalization }}
           <nz-filter-trigger [nzVisible]="nameFilterVisible" [nzActive]="!!nameFilter" [nzDropdownMenu]="nameFilterMenu" (nzVisibleChange)="nameFilterVisible = $event">
@@ -75,9 +74,9 @@
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
                 {{ '::Edit' | abpLocalization }}
               </li>
-              <li *abpPermission="'AbpIdentity.Roles.ManagePermissions'" nz-menu-item (click)="openPermissions(row)">
+              <li nz-menu-item (click)="openPermissionModal(row)">
                 <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
-                {{ '::Permissions' | abpLocalization }}
+                {{ '::Permission' | abpLocalization }}
               </li>
               <li *abpPermission="'AbpIdentity.Roles.Delete'" nz-menu-item nzDanger (click)="deleteRole(row)" [nzDisabled]="row.isStatic">
                 <span nz-icon nzType="delete" nzTheme="outline"></span>
@@ -134,10 +133,40 @@
   </ng-container>
 </nz-modal>
 
-<!-- ABP权限管理弹窗（复用ABP原生组件） -->
-<abp-permission-management
-  providerName="R"
-  [providerKey]="permissionProviderKey"
-  [(visible)]="permissionVisible"
-  [hideBadges]="true">
-</abp-permission-management>
+<!-- 权限管理弹窗（菜单权限 + 数据权限 tabs） -->
+<nz-modal
+  [(nzVisible)]="permissionModalVisible"
+  [nzTitle]="'权限管理 - ' + permissionRoleName"
+  nzWidth="680px"
+  [nzFooter]="permissionFooter"
+  (nzOnCancel)="closePermissionModal()"
+>
+  <ng-container *nzModalContent>
+    <nz-tabset [(nzSelectedIndex)]="permissionTabIndex">
+      <!-- 菜单权限 Tab（NG-ZORRO实现） -->
+      <nz-tab nzTitle="菜单权限">
+        <app-menu-permission
+          [roleName]="permissionProviderKey">
+        </app-menu-permission>
+      </nz-tab>
+      <!-- 数据权限 Tab -->
+      <nz-tab nzTitle="数据权限">
+        <app-data-permission-modal
+          [roleId]="dataPermissionRoleId"
+          [saving]="dataPermissionSaving"
+          (saved)="onDataPermissionSaved()"
+          (saveFailed)="onDataPermissionSaveFailed()">
+        </app-data-permission-modal>
+      </nz-tab>
+    </nz-tabset>
+  </ng-container>
+</nz-modal>
+<ng-template #permissionFooter>
+  <button nz-button nzType="default" (click)="closePermissionModal()">关闭</button>
+  <button *ngIf="permissionTabIndex === 0" nz-button nzType="primary" [nzLoading]="menuPermissionSaving" (click)="saveMenuPermission()">
+    {{ '::Save' | abpLocalization }}
+  </button>
+  <button *ngIf="permissionTabIndex === 1" nz-button nzType="primary" [nzLoading]="dataPermissionSaving" (click)="saveDataPermission()">
+    {{ '::Save' | abpLocalization }}
+  </button>
+</ng-template>

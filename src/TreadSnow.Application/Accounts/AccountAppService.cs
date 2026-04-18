@@ -3,10 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TreadSnow.DataPermissions;
+using TreadSnow.Lookups;
 using TreadSnow.Permissions;
+using TreadSnow.Teams;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Identity;
 
 namespace TreadSnow.Accounts
 {
@@ -16,11 +21,39 @@ namespace TreadSnow.Accounts
     [Authorize(TreadSnowPermissions.Accounts.Default)]
     public class AccountAppService : ApplicationService, IAccountAppService
     {
+        /// <summary>
+        /// 会员仓储
+        /// </summary>
         private readonly IRepository<Account, Guid> _repository;
 
-        public AccountAppService(IRepository<Account, Guid> repository)
+        /// <summary>
+        /// 数据权限过滤服务
+        /// </summary>
+        private readonly DataPermissionService _dataPermissionService;
+
+        /// <summary>
+        /// 用户仓储（用于查询负责人名称）
+        /// </summary>
+        private readonly IRepository<IdentityUser, Guid> _userRepository;
+
+        /// <summary>
+        /// 团队仓储（用于查询负责团队名称）
+        /// </summary>
+        private readonly IRepository<Team, Guid> _teamRepository;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="repository">会员仓储</param>
+        /// <param name="dataPermissionService">数据权限过滤服务</param>
+        /// <param name="userRepository">用户仓储</param>
+        /// <param name="teamRepository">团队仓储</param>
+        public AccountAppService(IRepository<Account, Guid> repository, DataPermissionService dataPermissionService, IRepository<IdentityUser, Guid> userRepository, IRepository<Team, Guid> teamRepository)
         {
             _repository = repository;
+            _dataPermissionService = dataPermissionService;
+            _userRepository = userRepository;
+            _teamRepository = teamRepository;
         }
 
         /// <summary>
@@ -31,11 +64,13 @@ namespace TreadSnow.Accounts
         public async Task<AccountDto> GetAsync(Guid id)
         {
             var account = await _repository.GetAsync(id);
-            return ObjectMapper.Map<Account, AccountDto>(account);
+            var dto = ObjectMapper.Map<Account, AccountDto>(account);
+            await FillLookupNamesAsync(new List<AccountDto> { dto });
+            return dto;
         }
 
         /// <summary>
-        /// 获取会员分页列表（支持name模糊筛选）
+        /// 获取会员分页列表（支持name模糊筛选 + 负责人筛选 + 数据权限过滤）
         /// </summary>
         /// <param name="input">查询条件</param>
         /// <returns>分页结果</returns>
@@ -49,16 +84,23 @@ namespace TreadSnow.Accounts
                 query = query.Where(x => x.Name.Contains(input.Name));
             }
 
-            var totalCount = await AsyncExecuter.CountAsync(query);
+            if (input.OwnerId.HasValue)
+            {
+                query = query.Where(x => x.OwnerId == input.OwnerId.Value);
+            }
 
-            query = query.OrderBy(x => x.Name).Skip(input.SkipCount).Take(input.MaxResultCount);
-            var accounts = await AsyncExecuter.ToListAsync(query);
+            query = await _dataPermissionService.ApplyReadFilterAsync(query, "account", x => x.OwnerId, x => x.OwnerTeamId);
 
-            return new PagedResultDto<AccountDto>(totalCount, ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts));
+            var totalCount = query.Count();
+            var accounts = query.OrderByDescending(x => x.CreationTime).Skip(input.SkipCount).Take(input.MaxResultCount).ToList();
+            var dtos = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
+            await FillLookupNamesAsync(dtos);
+
+            return new PagedResultDto<AccountDto>(totalCount, dtos);
         }
 
         /// <summary>
-        /// 获取所有会员列表（不分页，用于导出）
+        /// 获取所有会员列表（不分页，用于导出 + 数据权限过滤）
         /// </summary>
         /// <param name="name">名称模糊筛选（可选）</param>
         /// <returns>全量列表</returns>
@@ -72,14 +114,16 @@ namespace TreadSnow.Accounts
                 query = query.Where(x => x.Name.Contains(name));
             }
 
-            query = query.OrderBy(x => x.Name);
-            var accounts = await AsyncExecuter.ToListAsync(query);
+            query = await _dataPermissionService.ApplyReadFilterAsync(query, "account", x => x.OwnerId, x => x.OwnerTeamId);
 
-            return ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
+            var accounts = query.OrderByDescending(x => x.CreationTime).ToList();
+            var dtos = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
+            await FillLookupNamesAsync(dtos);
+            return dtos;
         }
 
         /// <summary>
-        /// 创建会员
+        /// 创建会员（OwnerId不传则默认当前用户）
         /// </summary>
         /// <param name="input">创建DTO</param>
         /// <returns>创建后的会员DTO</returns>
@@ -88,12 +132,13 @@ namespace TreadSnow.Accounts
         {
             var account = ObjectMapper.Map<CreateAccountDto, Account>(input);
             account.TenantId = CurrentTenant.Id;
+            account.OwnerId = input.OwnerId ?? CurrentUser.Id;
             await _repository.InsertAsync(account);
             return ObjectMapper.Map<Account, AccountDto>(account);
         }
 
         /// <summary>
-        /// 更新会员
+        /// 更新会员（含写权限校验）
         /// </summary>
         /// <param name="id">会员Id</param>
         /// <param name="input">更新DTO</param>
@@ -102,19 +147,90 @@ namespace TreadSnow.Accounts
         public async Task<AccountDto> UpdateAsync(Guid id, UpdateAccountDto input)
         {
             var account = await _repository.GetAsync(id);
+
+            var hasPermission = await _dataPermissionService.CheckWritePermissionAsync("account", account.OwnerId, account.OwnerTeamId);
+            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的编辑权限");
+
             ObjectMapper.Map(input, account);
             await _repository.UpdateAsync(account);
             return ObjectMapper.Map<Account, AccountDto>(account);
         }
 
         /// <summary>
-        /// 删除会员
+        /// 删除会员（含删除权限校验）
         /// </summary>
         /// <param name="id">会员Id</param>
         [Authorize(TreadSnowPermissions.Accounts.Delete)]
         public async Task DeleteAsync(Guid id)
         {
+            var account = await _repository.GetAsync(id);
+
+            var hasPermission = await _dataPermissionService.CheckDeletePermissionAsync("account", account.OwnerId, account.OwnerTeamId);
+            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的删除权限");
+
             await _repository.DeleteAsync(id);
+        }
+
+        /// <summary>
+        /// 获取用户下拉列表（用于选择负责人）
+        /// </summary>
+        /// <returns>用户Id和名称列表</returns>
+        public async Task<ListResultDto<UserLookupDto>> GetOwnerLookupAsync()
+        {
+            var queryable = await _userRepository.GetQueryableAsync();
+            var users = await AsyncExecuter.ToListAsync(queryable);
+            var items = users.Select(u => new UserLookupDto { Id = u.Id, Name = u.UserName }).ToList();
+            return new ListResultDto<UserLookupDto>(items);
+        }
+
+        /// <summary>
+        /// 获取团队下拉列表（用于选择负责团队）
+        /// </summary>
+        /// <returns>团队Id和名称列表</returns>
+        public async Task<ListResultDto<TeamLookupDto>> GetTeamLookupAsync()
+        {
+            var teams = await _teamRepository.GetListAsync();
+            var items = teams.Select(t => new TeamLookupDto { Id = t.Id, Name = t.Name }).ToList();
+            return new ListResultDto<TeamLookupDto>(items);
+        }
+
+        /// <summary>
+        /// 批量填充负责人、负责团队、创建人、修改人名称
+        /// </summary>
+        /// <param name="dtos">DTO列表</param>
+        private async Task FillLookupNamesAsync(List<AccountDto> dtos)
+        {
+            var ownerIds = dtos.Where(d => d.OwnerId.HasValue).Select(d => d.OwnerId!.Value).Distinct().ToList();
+            var creatorIds = dtos.Where(d => d.CreatorId.HasValue).Select(d => d.CreatorId!.Value).Distinct().ToList();
+            var modifierIds = dtos.Where(d => d.LastModifierId.HasValue).Select(d => d.LastModifierId!.Value).Distinct().ToList();
+            var allUserIds = ownerIds.Union(creatorIds).Union(modifierIds).Distinct().ToList();
+
+            var teamIds = dtos.Where(d => d.OwnerTeamId.HasValue).Select(d => d.OwnerTeamId!.Value).Distinct().ToList();
+
+            var userDict = new Dictionary<Guid, string>();
+            var teamDict = new Dictionary<Guid, string>();
+
+            if (allUserIds.Any())
+            {
+                var userQueryable = await _userRepository.GetQueryableAsync();
+                var users = await AsyncExecuter.ToListAsync(userQueryable.Where(u => allUserIds.Contains(u.Id)));
+                userDict = users.ToDictionary(u => u.Id, u => u.UserName);
+            }
+
+            if (teamIds.Any())
+            {
+                var teamQueryable = await _teamRepository.GetQueryableAsync();
+                var teams = await AsyncExecuter.ToListAsync(teamQueryable.Where(t => teamIds.Contains(t.Id)));
+                teamDict = teams.ToDictionary(t => t.Id, t => t.Name);
+            }
+
+            foreach (var dto in dtos)
+            {
+                if (dto.OwnerId.HasValue && userDict.TryGetValue(dto.OwnerId.Value, out var ownerName)) dto.OwnerName = ownerName;
+                if (dto.OwnerTeamId.HasValue && teamDict.TryGetValue(dto.OwnerTeamId.Value, out var teamName)) dto.OwnerTeamName = teamName;
+                if (dto.CreatorId.HasValue && userDict.TryGetValue(dto.CreatorId.Value, out var creatorName)) dto.CreatorName = creatorName;
+                if (dto.LastModifierId.HasValue && userDict.TryGetValue(dto.LastModifierId.Value, out var modifierName)) dto.LastModifierName = modifierName;
+            }
         }
     }
 }

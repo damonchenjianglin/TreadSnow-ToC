@@ -1,4 +1,5 @@
-﻿using Volo.Abp.Application.Dtos;
+﻿using System;
+using Volo.Abp.Application.Dtos;
 
 namespace TreadSnow.UploadFiles
 {
@@ -17,5 +18,10 @@ namespace TreadSnow.UploadFiles
         /// 记录Id（可选，用于子表场景按记录筛选）
         /// </summary>
         public string? RecordId { get; set; }
+
+        /// <summary>
+        /// 按负责人筛选（可选）
+        /// </summary>
+        public Guid? OwnerId { get; set; }
     }
 }
