@@ -21,7 +21,7 @@ public class TreadSnowApplicationAutoMapperProfile : Profile
         CreateMap<UpdatePetDto, Pet>();
         CreateMap<Account, AccountLookupDto>();
 
-        // ����
+        // 附件
         CreateMap<UploadFile, UploadFileDto>();
         CreateMap<CreateUploadFileDto, UploadFile>();
         CreateMap<UpdateUploadFileDto, UploadFile>();
