@@ -22,8 +22,6 @@ export interface AccountLookupDto extends EntityDto<string> {
 
 /** 创建宠物DTO */
 export interface CreatePetDto {
-  /** 租户ID（多租户隔离） */
-  tenantId?: string;
   /** 宠物名称（必填） */
   name: string;
   /** 所属会员ID（必填） */
@@ -32,8 +30,6 @@ export interface CreatePetDto {
 
 /** 更新宠物DTO */
 export interface UpdatePetDto {
-  /** 租户ID（多租户隔离） */
-  tenantId?: string;
   /** 宠物名称（必填） */
   name: string;
   /** 所属会员ID（必填） */

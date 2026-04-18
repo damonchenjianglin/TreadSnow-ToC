@@ -140,6 +140,7 @@ namespace TreadSnow.Pets
                 throw new UserFriendlyException("Account not found");
             }
             var pet = ObjectMapper.Map<CreatePetDto, Pet>(input);
+            pet.TenantId = CurrentTenant.Id;
             await _repository.InsertAsync(pet);
             return ObjectMapper.Map<Pet, PetDto>(pet);
         }

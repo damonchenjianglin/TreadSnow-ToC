@@ -20,8 +20,6 @@ export interface AccountDto extends EntityDto<string> {
 
 /** 创建会员DTO */
 export interface CreateAccountDto {
-  /** 租户ID */
-  tenantId?: string;
   /** 会员名称 */
   name: string;
   /** 手机号码 */
@@ -36,8 +34,6 @@ export interface CreateAccountDto {
 
 /** 更新会员DTO */
 export interface UpdateAccountDto {
-  /** 租户ID */
-  tenantId?: string;
   /** 会员名称 */
   name: string;
   /** 手机号码 */

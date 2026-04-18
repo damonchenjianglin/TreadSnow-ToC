@@ -1,12 +1,13 @@
 ﻿using System;
 using Volo.Abp.Domain.Entities.Auditing;
+using Volo.Abp.MultiTenancy;
 
 namespace TreadSnow.Accounts
 {
     /// <summary>
     /// 会员
     /// </summary>
-    public class Account : FullAuditedAggregateRoot<Guid>
+    public class Account : FullAuditedAggregateRoot<Guid>, IMultiTenant
     {
         /// <summary>
         /// 租户Id

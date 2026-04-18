@@ -87,6 +87,7 @@ namespace TreadSnow.Accounts
         public async Task<AccountDto> CreateAsync(CreateAccountDto input)
         {
             var account = ObjectMapper.Map<CreateAccountDto, Account>(input);
+            account.TenantId = CurrentTenant.Id;
             await _repository.InsertAsync(account);
             return ObjectMapper.Map<Account, AccountDto>(account);
         }

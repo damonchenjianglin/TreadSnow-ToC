@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TreadSnow.UploadFiles
 {
+    /// <summary>
+    /// 创建附件DTO
+    /// </summary>
     public class CreateUploadFileDto
     {
-        public Guid? TenantId { get; set; }
-
         [Required]
         public string EntityName { get; set; } = string.Empty;
 

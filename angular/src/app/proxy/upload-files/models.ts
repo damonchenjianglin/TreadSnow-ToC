@@ -26,8 +26,6 @@ export interface UploadFileDto extends EntityDto<string> {
  * 用于创建新附件时提交的数据
  */
 export interface CreateUploadFileDto {
-  /** 租户ID */
-  tenantId?: string;
   /** 实体名称 */
   entityName: string;
   /** 记录ID */
@@ -45,8 +43,6 @@ export interface CreateUploadFileDto {
  * 用于编辑附件时提交的数据
  */
 export interface UpdateUploadFileDto {
-  /** 租户ID */
-  tenantId?: string;
   /** 实体名称 */
   entityName: string;
   /** 记录ID */

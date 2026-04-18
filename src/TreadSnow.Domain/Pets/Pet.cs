@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using TreadSnow.Accounts;
 using Volo.Abp.Domain.Entities.Auditing;
+using Volo.Abp.MultiTenancy;
 
 namespace TreadSnow.Pets
 {
     /// <summary>
     /// 宠物
     /// </summary>
-    public class Pet : FullAuditedAggregateRoot<Guid>
+    public class Pet : FullAuditedAggregateRoot<Guid>, IMultiTenant
     {
         /// <summary>
         /// 租户Id

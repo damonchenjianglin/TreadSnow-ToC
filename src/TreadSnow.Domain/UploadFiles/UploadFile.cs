@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Auditing;
+using Volo.Abp.MultiTenancy;
 
 namespace TreadSnow.UploadFiles
 {
     /// <summary>
     /// 附件
     /// </summary>
-    public class UploadFile : FullAuditedAggregateRoot<Guid>
+    public class UploadFile : FullAuditedAggregateRoot<Guid>, IMultiTenant
     {
         /// <summary>
         /// 租户Id

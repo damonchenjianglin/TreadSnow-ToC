@@ -96,6 +96,7 @@ namespace TreadSnow.UploadFiles
         public async Task<UploadFileDto> CreateAsync(CreateUploadFileDto input)
         {
             var UploadFile = ObjectMapper.Map<CreateUploadFileDto, UploadFile>(input);
+            UploadFile.TenantId = CurrentTenant.Id;
             await _repository.InsertAsync(UploadFile);
             return ObjectMapper.Map<UploadFile, UploadFileDto>(UploadFile);
         }

@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TreadSnow.Accounts
 {
+    /// <summary>
+    /// 创建会员DTO
+    /// </summary>
     public class CreateAccountDto
     {
-        public Guid? TenantId { get; set; }
-
         [Required]
         public string Name { get; set; } = string.Empty;
 
