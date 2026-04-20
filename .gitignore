@@ -278,3 +278,4 @@ tempkey.jwk
 /src/TreadSnow.HttpApi.Host/appsettings.Development.json
 /src/TreadSnow.EntityFrameworkCore/Migrations/20250611035218_Initial.cs
 /angular/.playwright-mcp
+/.playwright-mcp
