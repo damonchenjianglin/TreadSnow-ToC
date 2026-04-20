@@ -1,9 +1,10 @@
 import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
 import * as XLSX from 'xlsx';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, Renderer2 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { AccountService, AccountDto, UserLookupDto, TeamLookupDto } from '../proxy/accounts';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 /**
  * 会员列表组件
@@ -16,7 +17,7 @@ import { AccountService, AccountDto, UserLookupDto, TeamLookupDto } from '../pro
   styleUrls: ['./account.component.scss'],
   providers: [ListService],
 })
-export class AccountComponent implements OnInit {
+export class AccountComponent implements OnInit, AfterViewInit {
   /** 会员分页数据 */
   account = { items: [], totalCount: 0 } as PagedResultDto<AccountDto>;
 
@@ -56,6 +57,46 @@ export class AccountComponent implements OnInit {
   /** 负责人筛选项列表（用于表格漏斗筛选） */
   ownerFilters: { text: string; value: string }[] = [];
 
+  /** 初始化表头列宽拖动手柄（动态插入到每个th的直接子级，避免被sorter包裹） */
+  ngAfterViewInit(): void {
+    this.setupColumnResize();
+  }
+
+  /** 为表头每个th（最后一列除外）添加拖动手柄 */
+  private setupColumnResize(): void {
+    setTimeout(() => {
+      const tableEl = this.el.nativeElement.querySelector('nz-table');
+      if (!tableEl) return;
+      const ths = tableEl.querySelectorAll('.ant-table-thead th');
+      const cols = tableEl.querySelectorAll('colgroup col');
+      ths.forEach((th: HTMLElement, index: number) => {
+        if (index >= ths.length - 1) return;
+        const col = cols[index] as HTMLElement;
+        if (!col) return;
+        const handle = this.renderer.createElement('span');
+        this.renderer.addClass(handle, 'col-resize-handle');
+        this.renderer.appendChild(th, handle);
+        this.renderer.listen(handle, 'mousedown', (e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const startX = e.clientX;
+          const startWidth = th.offsetWidth;
+          const onMouseMove = (ev: MouseEvent) => {
+            const newWidth = Math.max(50, startWidth + ev.clientX - startX) + 'px';
+            this.renderer.setStyle(col, 'width', newWidth);
+            this.renderer.setStyle(col, 'min-width', newWidth);
+          };
+          const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          };
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    });
+  }
+
   /** 按编号排序函数 */
   sortByNo = (a: AccountDto, b: AccountDto) => a.no - b.no;
 
@@ -83,7 +124,7 @@ export class AccountComponent implements OnInit {
   /** 按创建时间排序函数 */
   sortByCreationTime = (a: AccountDto, b: AccountDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
 
-  constructor(public readonly list: ListService, private accountService: AccountService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
+  constructor(public readonly list: ListService, private accountService: AccountService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService, private message: NzMessageService, private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
     this.currentUserId = this.configState.getDeep('currentUser.id') || '';
@@ -159,7 +200,14 @@ export class AccountComponent implements OnInit {
   delete(id: string) {
     this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
       if (status === Confirmation.Status.confirm) {
-        this.accountService.delete(id).subscribe(() => this.list.get());
+        this.accountService.delete(id).subscribe({
+          next: () => this.list.get(),
+          error: (err: any) => {
+            if (err?.status === 403 || err?.error?.error?.code === 'Volo.Authorization') {
+              this.message.warning('您没有该记录的删除权限');
+            }
+          },
+        });
       }
     });
   }
@@ -187,10 +235,17 @@ export class AccountComponent implements OnInit {
       ? this.accountService.update(this.selectedAccount.id, this.form.value)
       : this.accountService.create(this.form.value);
 
-    request.subscribe(() => {
-      this.isModalOpen = false;
-      this.form.reset();
-      this.list.get();
+    request.subscribe({
+      next: () => {
+        this.isModalOpen = false;
+        this.form.reset();
+        this.list.get();
+      },
+      error: (err: any) => {
+        if (err?.status === 403 || err?.error?.error?.code === 'Volo.Authorization') {
+          this.message.warning('您没有该记录的编辑权限');
+        }
+      },
     });
   }
 

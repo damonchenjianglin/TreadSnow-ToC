@@ -66,15 +66,15 @@
     </thead>
     <tbody>
       <tr *ngFor="let row of petTable.data">
-        <td>{{ row.no }}</td>
-        <td>{{ row.name }}</td>
-        <td>{{ row.accountName }}</td>
-        <td>{{ row.ownerName }}</td>
-        <td>{{ row.ownerTeamName }}</td>
-        <td>{{ row.creatorName }}</td>
-        <td>{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</td>
-        <td>{{ row.lastModifierName }}</td>
-        <td>{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.no">{{ row.no }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.name">{{ row.name }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.accountName">{{ row.accountName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerName">{{ row.ownerName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerTeamName">{{ row.ownerTeamName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creatorName">{{ row.creatorName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creationTime | date:'yyyy-MM-dd HH:mm'">{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModifierName">{{ row.lastModifierName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModificationTime | date:'yyyy-MM-dd HH:mm'">{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
         <td nzRight>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
@@ -85,12 +85,14 @@
             <ul nz-menu>
               <li *abpPermission="'TreadSnow.Pets.Edit'" nz-menu-item (click)="editPet(row.id)">
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
-                {{ '::Edit' | abpLocalization }}
+                查看/编辑
               </li>
-              <li *abpPermission="'TreadSnow.Pets.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-                {{ '::Delete' | abpLocalization }}
-              </li>
+              <ng-container *abpPermission="'TreadSnow.Pets.Delete'">
+                <li *ngIf="row.canDelete" nz-menu-item nzDanger (click)="delete(row.id)">
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                  {{ '::Delete' | abpLocalization }}
+                </li>
+              </ng-container>
             </ul>
           </nz-dropdown-menu>
         </td>
@@ -114,7 +116,7 @@
 <nz-modal
   [(nzVisible)]="isModalOpen"
   [nzTitle]="(selectedPet.id ? '::Edit' : '::NewPet') | abpLocalization"
-  [nzOkText]="'::Save' | abpLocalization"
+  [nzOkText]="(selectedPet.id && selectedPet.canEdit === false) ? null : ('::Save' | abpLocalization)"
   [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
   nzWidth="520px"

@@ -2,6 +2,42 @@
     --lpx-logo: url('/images/logo/leptonxlite/logo-light.png');
     --lpx-logo-icon: url('/images/logo/leptonxlite/logo-light-thumbnail.png');
 }
-:root .abp-account-layout .lpx-brand-logo{
+
+:root .abp-account-layout .lpx-brand-logo {
     --lpx-logo: url('/images/logo/leptonxlite/logo-dark.png');
+}
+
+/* 覆盖Bootstrap/LeptonX的输入框灰色背景为白色 */
+:root,
+[data-bs-theme="light"] {
+    --bs-secondary-bg: #fff;
+    --bs-secondary-bg-rgb: 255, 255, 255;
+    --bs-tertiary-bg: #fff;
+    --bs-tertiary-bg-rgb: 255, 255, 255;
+}
+
+.form-control,
+.form-select,
+.form-control:hover,
+.form-control:focus,
+.form-control:disabled,
+.form-control[readonly],
+.form-select:hover,
+.form-select:focus,
+.form-select:disabled,
+.input-group-text,
+.form-floating > .form-control,
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-select {
+    background-color: #fff !important;
+}
+
+/* 浏览器自动填充背景覆盖 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #fff inset !important;
+    box-shadow: 0 0 0 30px #fff inset !important;
 }

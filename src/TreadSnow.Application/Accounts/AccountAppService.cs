@@ -9,7 +9,6 @@ using TreadSnow.Permissions;
 using TreadSnow.Teams;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
 
@@ -65,7 +64,9 @@ namespace TreadSnow.Accounts
         {
             var account = await _repository.GetAsync(id);
             var dto = ObjectMapper.Map<Account, AccountDto>(account);
-            await FillLookupNamesAsync(new List<AccountDto> { dto });
+            var dtoList = new List<AccountDto> { dto };
+            await FillLookupNamesAsync(dtoList);
+            await FillPermissionsAsync(dtoList);
             return dto;
         }
 
@@ -95,6 +96,7 @@ namespace TreadSnow.Accounts
             var accounts = query.OrderByDescending(x => x.CreationTime).Skip(input.SkipCount).Take(input.MaxResultCount).ToList();
             var dtos = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
             await FillLookupNamesAsync(dtos);
+            await FillPermissionsAsync(dtos);
 
             return new PagedResultDto<AccountDto>(totalCount, dtos);
         }
@@ -119,6 +121,7 @@ namespace TreadSnow.Accounts
             var accounts = query.OrderByDescending(x => x.CreationTime).ToList();
             var dtos = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
             await FillLookupNamesAsync(dtos);
+            await FillPermissionsAsync(dtos);
             return dtos;
         }
 
@@ -149,7 +152,7 @@ namespace TreadSnow.Accounts
             var account = await _repository.GetAsync(id);
 
             var hasPermission = await _dataPermissionService.CheckWritePermissionAsync("account", account.OwnerId, account.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的编辑权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的编辑权限");
 
             ObjectMapper.Map(input, account);
             await _repository.UpdateAsync(account);
@@ -166,7 +169,7 @@ namespace TreadSnow.Accounts
             var account = await _repository.GetAsync(id);
 
             var hasPermission = await _dataPermissionService.CheckDeletePermissionAsync("account", account.OwnerId, account.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的删除权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的删除权限");
 
             await _repository.DeleteAsync(id);
         }
@@ -192,6 +195,21 @@ namespace TreadSnow.Accounts
             var teams = await _teamRepository.GetListAsync();
             var items = teams.Select(t => new TeamLookupDto { Id = t.Id, Name = t.Name }).ToList();
             return new ListResultDto<TeamLookupDto>(items);
+        }
+
+        /// <summary>
+        /// 批量填充每条记录的编辑/删除权限标识
+        /// </summary>
+        /// <param name="dtos">DTO列表</param>
+        private async Task FillPermissionsAsync(List<AccountDto> dtos)
+        {
+            var records = dtos.Select(d => (d.OwnerId, d.OwnerTeamId)).ToList();
+            var permissions = await _dataPermissionService.BatchCheckPermissionsAsync("account", records);
+            for (var i = 0; i < dtos.Count; i++)
+            {
+                dtos[i].CanEdit = permissions[i].CanEdit;
+                dtos[i].CanDelete = permissions[i].CanDelete;
+            }
         }
 
         /// <summary>

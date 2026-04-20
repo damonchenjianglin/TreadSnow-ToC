@@ -68,8 +68,6 @@ TreadSnow.DbMigrator            → 数据库迁移控制台工具
 
 | 实体 | 基类 | 说明 | 多租户 |
 |------|------|------|--------|
-| `Book` | `AuditedAggregateRoot<Guid>` | 图书（Name, Type, PublishDate, Price, AuthorId） | 否 |
-| `Author` | `FullAuditedAggregateRoot<Guid>` | 作者（Name, BirthDate, ShortBio） | 否 |
 | `Account` | `FullAuditedAggregateRoot<Guid>` | 会员（No自增, Name, Phone, Email, OpenId） | 是 |
 | `Pet` | `FullAuditedAggregateRoot<Guid>` | 宠物（No自增, Name, AccountId外键） | 是 |
 | `UploadFile` | `FullAuditedAggregateRoot<Guid>` | 附件（EntityName, RecordId, Name, Type, Path） | 是 |

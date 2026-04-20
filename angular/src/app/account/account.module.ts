@@ -16,6 +16,8 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 /**
  * 会员模块
@@ -39,6 +41,8 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
     NzTagModule,
     NzMenuModule,
     NzGridModule,
+    NzMessageModule,
+    NzToolTipModule,
     FormsModule,
   ]
 })

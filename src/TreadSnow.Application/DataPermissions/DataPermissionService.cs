@@ -235,6 +235,65 @@ namespace TreadSnow.DataPermissions
         }
 
         /// <summary>
+        /// 批量校验当前用户对多条记录的编辑和删除权限（预加载数据，避免N+1查询）
+        /// </summary>
+        /// <param name="entityName">实体名称</param>
+        /// <param name="records">记录列表，每条包含OwnerId和OwnerTeamId</param>
+        /// <returns>每条记录的(canEdit, canDelete)元组列表，顺序与输入一致</returns>
+        public async Task<List<(bool CanEdit, bool CanDelete)>> BatchCheckPermissionsAsync(string entityName, List<(Guid? OwnerId, Guid? OwnerTeamId)> records)
+        {
+            if (!_currentUser.IsAuthenticated || !records.Any())
+                return records.Select(_ => (false, false)).ToList();
+
+            var (_, writeLevel, deleteLevel) = await GetEffectivePermissionAsync(entityName);
+            var userId = _currentUser.Id!.Value;
+
+            HashSet<Guid>? myTeamIds = null;
+            HashSet<Guid>? deptUserIds = null;
+            HashSet<Guid>? deptTeamIds = null;
+            HashSet<Guid>? deptChildUserIds = null;
+            HashSet<Guid>? deptChildTeamIds = null;
+
+            var maxLevel = Math.Max(writeLevel, deleteLevel);
+            if (maxLevel >= 1) myTeamIds = (await GetUserTeamIdsAsync(userId)).ToHashSet();
+            if (maxLevel >= 2) { deptUserIds = await GetDepartmentUserIdsAsync(userId, false); deptTeamIds = await GetDepartmentTeamIdsAsync(userId, false); }
+            if (maxLevel >= 3) { deptChildUserIds = await GetDepartmentUserIdsAsync(userId, true); deptChildTeamIds = await GetDepartmentTeamIdsAsync(userId, true); }
+
+            var results = new List<(bool CanEdit, bool CanDelete)>(records.Count);
+            foreach (var (ownerId, ownerTeamId) in records)
+            {
+                var canEdit = CheckLevelInMemory(writeLevel, userId, ownerId, ownerTeamId, myTeamIds, deptUserIds, deptTeamIds, deptChildUserIds, deptChildTeamIds);
+                var canDelete = CheckLevelInMemory(deleteLevel, userId, ownerId, ownerTeamId, myTeamIds, deptUserIds, deptTeamIds, deptChildUserIds, deptChildTeamIds);
+                results.Add((canEdit, canDelete));
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// 基于预加载数据在内存中判断单条记录的权限
+        /// </summary>
+        /// <param name="level">权限等级</param>
+        /// <param name="userId">当前用户Id</param>
+        /// <param name="ownerId">记录负责人Id</param>
+        /// <param name="ownerTeamId">记录负责团队Id</param>
+        /// <param name="myTeamIds">当前用户所在团队Id集合</param>
+        /// <param name="deptUserIds">本部门用户Id集合</param>
+        /// <param name="deptTeamIds">本部门团队Id集合</param>
+        /// <param name="deptChildUserIds">本部门及下级部门用户Id集合</param>
+        /// <param name="deptChildTeamIds">本部门及下级部门团队Id集合</param>
+        /// <returns>是否有权限</returns>
+        private bool CheckLevelInMemory(int level, Guid userId, Guid? ownerId, Guid? ownerTeamId, HashSet<Guid>? myTeamIds, HashSet<Guid>? deptUserIds, HashSet<Guid>? deptTeamIds, HashSet<Guid>? deptChildUserIds, HashSet<Guid>? deptChildTeamIds)
+        {
+            if (level >= 4) return true;
+            if (level <= 0) return false;
+            if (level == 1) return ownerId == userId || (ownerTeamId.HasValue && myTeamIds != null && myTeamIds.Contains(ownerTeamId.Value));
+            if (level == 2) return (ownerId.HasValue && deptUserIds != null && deptUserIds.Contains(ownerId.Value)) || (ownerTeamId.HasValue && deptTeamIds != null && deptTeamIds.Contains(ownerTeamId.Value));
+            if (level == 3) return (ownerId.HasValue && deptChildUserIds != null && deptChildUserIds.Contains(ownerId.Value)) || (ownerTeamId.HasValue && deptChildTeamIds != null && deptChildTeamIds.Contains(ownerTeamId.Value));
+            return false;
+        }
+
+        /// <summary>
         /// 获取用户所有角色Id（直接角色+团队角色）
         /// </summary>
         /// <param name="userId">用户Id</param>

@@ -1,0 +1,25 @@
+{
+  "accounts": {
+    "sales_mgr_zhang": "07736ce6-b9cd-8773-a818-3a20b7363982",
+    "sales_staff_li": "2eaa1f6e-0cb4-18f4-854a-3a20b7363acc",
+    "sales_staff_wang": "c5e1fb38-892b-b499-6b29-3a20b7363bdd",
+    "tech_mgr_chen": "c92afb7d-1466-dc3d-92b2-3a20b7363cf0",
+    "tech_staff_zhao": "897d0f7a-750b-0472-11cc-3a20b7363e06",
+    "admin": "97d2cd5b-a695-f393-fce2-3a20b7363f06",
+    "team_a_shared": "98cebe77-d7db-5e8c-5669-3a20b7364006"
+  },
+  "pets": {
+    "sales_mgr_zhang": "90882123-934d-1873-91da-3a20b736415c",
+    "sales_staff_li": "98173ef8-3021-3136-a617-3a20b736428b",
+    "sales_staff_wang": "7679d295-7655-d81f-96b7-3a20b736438b",
+    "tech_mgr_chen": "e0008c91-be07-e3bc-3d0c-3a20b73644c1",
+    "tech_staff_zhao": "b2b6c295-b58d-654a-23cf-3a20b7364685"
+  },
+  "files": {
+    "sales_mgr_zhang": "9b5ebb79-bb0c-48c1-1625-3a20b73647c7",
+    "sales_staff_li": "f79d0051-faff-dc72-a2a9-3a20b736642f",
+    "sales_staff_wang": "90a700bd-407c-f106-717c-3a20b73649c9",
+    "tech_mgr_chen": "19ad6e76-9f3f-4b04-7e11-3a20b7364ac9",
+    "tech_staff_zhao": "a61bf29f-5b86-22f0-0bce-3a20b7364bf0"
+  }
+}

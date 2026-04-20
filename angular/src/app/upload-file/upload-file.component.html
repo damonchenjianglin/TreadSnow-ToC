@@ -72,19 +72,19 @@
     </thead>
     <tbody>
       <tr *ngFor="let row of uploadFileTable.data">
-        <td>{{ row.name }}</td>
-        <td>{{ row.entityName }}</td>
-        <td>{{ row.recordId }}</td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.name">{{ row.name }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.entityName">{{ row.entityName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.recordId">{{ row.recordId }}</span></td>
         <td>
           <nz-tag [nzColor]="'blue'">{{ row.type }}</nz-tag>
         </td>
-        <td>{{ row.path }}</td>
-        <td>{{ row.ownerName }}</td>
-        <td>{{ row.ownerTeamName }}</td>
-        <td>{{ row.creatorName }}</td>
-        <td>{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</td>
-        <td>{{ row.lastModifierName }}</td>
-        <td>{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.path">{{ row.path }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerName">{{ row.ownerName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerTeamName">{{ row.ownerTeamName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creatorName">{{ row.creatorName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creationTime | date:'yyyy-MM-dd HH:mm'">{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModifierName">{{ row.lastModifierName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModificationTime | date:'yyyy-MM-dd HH:mm'">{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
         <td nzRight>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
@@ -95,12 +95,14 @@
             <ul nz-menu>
               <li *abpPermission="'TreadSnow.UploadFiles.Edit'" nz-menu-item (click)="editUploadFile(row.id)">
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
-                {{ '::Edit' | abpLocalization }}
+                查看/编辑
               </li>
-              <li *abpPermission="'TreadSnow.UploadFiles.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-                {{ '::Delete' | abpLocalization }}
-              </li>
+              <ng-container *abpPermission="'TreadSnow.UploadFiles.Delete'">
+                <li *ngIf="row.canDelete" nz-menu-item nzDanger (click)="delete(row.id)">
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                  {{ '::Delete' | abpLocalization }}
+                </li>
+              </ng-container>
             </ul>
           </nz-dropdown-menu>
         </td>
@@ -113,7 +115,7 @@
 <nz-modal
   [(nzVisible)]="isModalOpen"
   [nzTitle]="(selectedUploadFile.id ? '::Edit' : '::NewUploadFile') | abpLocalization"
-  [nzOkText]="'::Save' | abpLocalization"
+  [nzOkText]="(selectedUploadFile.id && selectedUploadFile.canEdit === false) ? null : ('::Save' | abpLocalization)"
   [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
   nzWidth="620px"

@@ -69,18 +69,18 @@
     </thead>
     <tbody>
       <tr *ngFor="let row of accountTable.data">
-        <td>{{ row.no }}</td>
-        <td>{{ row.name }}</td>
-        <td>{{ row.phone }}</td>
-        <td>{{ row.email }}</td>
-        <td>{{ row.openId }}</td>
-        <td>{{ row.description }}</td>
-        <td>{{ row.ownerName }}</td>
-        <td>{{ row.ownerTeamName }}</td>
-        <td>{{ row.creatorName }}</td>
-        <td>{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</td>
-        <td>{{ row.lastModifierName }}</td>
-        <td>{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.no">{{ row.no }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.name">{{ row.name }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.phone">{{ row.phone }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.email">{{ row.email }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.openId">{{ row.openId }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.description">{{ row.description }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerName">{{ row.ownerName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.ownerTeamName">{{ row.ownerTeamName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creatorName">{{ row.creatorName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.creationTime | date:'yyyy-MM-dd HH:mm'">{{ row.creationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModifierName">{{ row.lastModifierName }}</span></td>
+        <td><span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="row.lastModificationTime | date:'yyyy-MM-dd HH:mm'">{{ row.lastModificationTime | date:'yyyy-MM-dd HH:mm' }}</span></td>
         <td nzRight>
           <a nz-dropdown [nzDropdownMenu]="actionMenu" nzTrigger="hover">
             <span nz-icon nzType="setting" nzTheme="outline"></span>
@@ -91,12 +91,14 @@
             <ul nz-menu>
               <li *abpPermission="'TreadSnow.Accounts.Edit'" nz-menu-item (click)="editAccount(row.id)">
                 <span nz-icon nzType="edit" nzTheme="outline"></span>
-                {{ '::Edit' | abpLocalization }}
+                查看/编辑
               </li>
-              <li *abpPermission="'TreadSnow.Accounts.Delete'" nz-menu-item nzDanger (click)="delete(row.id)">
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-                {{ '::Delete' | abpLocalization }}
-              </li>
+              <ng-container *abpPermission="'TreadSnow.Accounts.Delete'">
+                <li *ngIf="row.canDelete" nz-menu-item nzDanger (click)="delete(row.id)">
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                  {{ '::Delete' | abpLocalization }}
+                </li>
+              </ng-container>
             </ul>
           </nz-dropdown-menu>
         </td>
@@ -120,7 +122,7 @@
 <nz-modal
   [(nzVisible)]="isModalOpen"
   [nzTitle]="(selectedAccount.id ? '::Edit' : '::NewAccount') | abpLocalization"
-  [nzOkText]="'::Save' | abpLocalization"
+  [nzOkText]="(selectedAccount.id && selectedAccount.canEdit === false) ? null : ('::Save' | abpLocalization)"
   [nzCancelText]="null"
   [nzOkDisabled]="form?.invalid"
   nzWidth="620px"

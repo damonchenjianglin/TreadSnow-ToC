@@ -17,8 +17,7 @@ namespace TreadSnow.Accounts
         [Required]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string OpenId { get; set; } = string.Empty;
+        public string? OpenId { get; set; }
 
         public string? Description { get; set; }
 

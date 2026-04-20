@@ -10,7 +10,6 @@ using TreadSnow.Teams;
 using TreadSnow.UploadFiles;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
 using Volo.Abp.Linq;
@@ -67,7 +66,9 @@ namespace TreadSnow.UploadFiles
         {
             var uploadFile = await _repository.GetAsync(id);
             var dto = ObjectMapper.Map<UploadFile, UploadFileDto>(uploadFile);
-            await FillLookupNamesAsync(new List<UploadFileDto> { dto });
+            var dtoList = new List<UploadFileDto> { dto };
+            await FillLookupNamesAsync(dtoList);
+            await FillPermissionsAsync(dtoList);
             return dto;
         }
 
@@ -94,12 +95,15 @@ namespace TreadSnow.UploadFiles
                 query = query.Where(x => x.OwnerId == input.OwnerId.Value);
             }
 
+            query = await _dataPermissionService.ApplyReadFilterAsync(query, "uploadFile", x => x.OwnerId, x => x.OwnerTeamId);
+
             var totalCount = await AsyncExecuter.CountAsync(query);
 
             query = query.OrderByDescending(x => x.CreationTime).Skip(input.SkipCount).Take(input.MaxResultCount);
             var uploadFiles = await AsyncExecuter.ToListAsync(query);
             var dtos = ObjectMapper.Map<List<UploadFile>, List<UploadFileDto>>(uploadFiles);
             await FillLookupNamesAsync(dtos);
+            await FillPermissionsAsync(dtos);
 
             return new PagedResultDto<UploadFileDto>(totalCount, dtos);
         }
@@ -113,10 +117,12 @@ namespace TreadSnow.UploadFiles
         public async Task<PagedResultDto<UploadFileDto>> GetListByEntityAsync(string entityName, string recordId)
         {
             var queryable = await _repository.GetQueryableAsync();
-            var query = queryable
-                .Where(f => f.EntityName == entityName && f.RecordId == recordId)
-                .OrderByDescending(f => f.CreationTime);
+            var baseQuery = queryable
+                .Where(f => f.EntityName == entityName && f.RecordId == recordId);
 
+            baseQuery = await _dataPermissionService.ApplyReadFilterAsync(baseQuery, "uploadFile", x => x.OwnerId, x => x.OwnerTeamId);
+
+            var query = baseQuery.OrderByDescending(f => f.CreationTime);
             var uploadFiles = await AsyncExecuter.ToListAsync(query);
             var totalCount = uploadFiles.Count;
 
@@ -152,7 +158,7 @@ namespace TreadSnow.UploadFiles
         {
             var uploadFile = await _repository.GetAsync(id);
             var hasPermission = await _dataPermissionService.CheckWritePermissionAsync("uploadFile", uploadFile.OwnerId, uploadFile.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的编辑权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的编辑权限");
             ObjectMapper.Map(input, uploadFile);
             await _repository.UpdateAsync(uploadFile);
             return ObjectMapper.Map<UploadFile, UploadFileDto>(uploadFile);
@@ -167,7 +173,7 @@ namespace TreadSnow.UploadFiles
         {
             var uploadFile = await _repository.GetAsync(id);
             var hasPermission = await _dataPermissionService.CheckDeletePermissionAsync("uploadFile", uploadFile.OwnerId, uploadFile.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的删除权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的删除权限");
             await _repository.DeleteAsync(id);
         }
 
@@ -192,6 +198,21 @@ namespace TreadSnow.UploadFiles
             var teams = await _teamRepository.GetListAsync();
             var items = teams.Select(t => new TeamLookupDto { Id = t.Id, Name = t.Name }).ToList();
             return new ListResultDto<TeamLookupDto>(items);
+        }
+
+        /// <summary>
+        /// 批量填充每条记录的编辑/删除权限标识
+        /// </summary>
+        /// <param name="dtos">DTO列表</param>
+        private async Task FillPermissionsAsync(List<UploadFileDto> dtos)
+        {
+            var records = dtos.Select(d => (d.OwnerId, d.OwnerTeamId)).ToList();
+            var permissions = await _dataPermissionService.BatchCheckPermissionsAsync("uploadFile", records);
+            for (var i = 0; i < dtos.Count; i++)
+            {
+                dtos[i].CanEdit = permissions[i].CanEdit;
+                dtos[i].CanDelete = permissions[i].CanDelete;
+            }
         }
 
         /// <summary>

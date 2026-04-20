@@ -37,12 +37,12 @@ namespace TreadSnow.Accounts
         /// <summary>
         /// OpenId
         /// </summary>
-        public string OpenId { get; set; }
+        public string? OpenId { get; set; }
 
         /// <summary>
         /// 描述
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// 负责人Id

@@ -11,7 +11,6 @@ using TreadSnow.Teams;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
 using Volo.Abp.Linq;
@@ -85,7 +84,9 @@ namespace TreadSnow.Pets
 
             var account = await _accountRepository.FindAsync(pet.AccountId);
             dto.AccountName = account?.Name;
-            await FillLookupNamesAsync(new List<PetDto> { dto });
+            var dtoList = new List<PetDto> { dto };
+            await FillLookupNamesAsync(dtoList);
+            await FillPermissionsAsync(dtoList);
 
             return dto;
         }
@@ -110,6 +111,8 @@ namespace TreadSnow.Pets
                 query = query.Where(x => x.OwnerId == input.OwnerId.Value);
             }
 
+            query = await _dataPermissionService.ApplyReadFilterAsync(query, "pet", x => x.OwnerId, x => x.OwnerTeamId);
+
             var totalCount = await _asyncExecuter.CountAsync(query);
 
             query = query.OrderByDescending(x => x.CreationTime).Skip(input.SkipCount).Take(input.MaxResultCount);
@@ -128,6 +131,7 @@ namespace TreadSnow.Pets
             }
 
             await FillLookupNamesAsync(dtos);
+            await FillPermissionsAsync(dtos);
 
             return new PagedResultDto<PetDto>(totalCount, dtos);
         }
@@ -147,6 +151,8 @@ namespace TreadSnow.Pets
                 query = query.Where(x => x.Name.Contains(name));
             }
 
+            query = await _dataPermissionService.ApplyReadFilterAsync(query, "pet", x => x.OwnerId, x => x.OwnerTeamId);
+
             query = query.OrderByDescending(x => x.CreationTime);
             var pets = await _asyncExecuter.ToListAsync(query);
             var dtos = ObjectMapper.Map<List<Pet>, List<PetDto>>(pets);
@@ -163,6 +169,7 @@ namespace TreadSnow.Pets
             }
 
             await FillLookupNamesAsync(dtos);
+            await FillPermissionsAsync(dtos);
 
             return dtos;
         }
@@ -233,7 +240,7 @@ namespace TreadSnow.Pets
         {
             var pet = await _repository.GetAsync(id);
             var hasPermission = await _dataPermissionService.CheckWritePermissionAsync("pet", pet.OwnerId, pet.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的编辑权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的编辑权限");
             ObjectMapper.Map(input, pet);
             await _repository.UpdateAsync(pet);
             return ObjectMapper.Map<Pet, PetDto>(pet);
@@ -248,8 +255,23 @@ namespace TreadSnow.Pets
         {
             var pet = await _repository.GetAsync(id);
             var hasPermission = await _dataPermissionService.CheckDeletePermissionAsync("pet", pet.OwnerId, pet.OwnerTeamId);
-            if (!hasPermission) throw new AbpAuthorizationException("没有该记录的删除权限");
+            if (!hasPermission) throw new Volo.Abp.UserFriendlyException("您没有该记录的删除权限");
             await _repository.DeleteAsync(id);
+        }
+
+        /// <summary>
+        /// 批量填充每条记录的编辑/删除权限标识
+        /// </summary>
+        /// <param name="dtos">DTO列表</param>
+        private async Task FillPermissionsAsync(List<PetDto> dtos)
+        {
+            var records = dtos.Select(d => (d.OwnerId, d.OwnerTeamId)).ToList();
+            var permissions = await _dataPermissionService.BatchCheckPermissionsAsync("pet", records);
+            for (var i = 0; i < dtos.Count; i++)
+            {
+                dtos[i].CanEdit = permissions[i].CanEdit;
+                dtos[i].CanDelete = permissions[i].CanDelete;
+            }
         }
 
         /// <summary>

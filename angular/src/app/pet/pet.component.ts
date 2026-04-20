@@ -1,9 +1,10 @@
 import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
 import * as XLSX from 'xlsx';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, Renderer2 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { PetService, PetDto, UserLookupDto, TeamLookupDto } from '../proxy/pets';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 /**
  * 宠物列表组件
@@ -16,7 +17,7 @@ import { PetService, PetDto, UserLookupDto, TeamLookupDto } from '../proxy/pets'
   styleUrls: ['./pet.component.scss'],
   providers: [ListService],
 })
-export class PetComponent implements OnInit {
+export class PetComponent implements OnInit, AfterViewInit {
   /** 宠物分页数据 */
   pet = { items: [], totalCount: 0 } as PagedResultDto<PetDto>;
 
@@ -65,6 +66,46 @@ export class PetComponent implements OnInit {
   /** 名称列筛选弹出框是否可见 */
   nameFilterVisible = false;
 
+  /** 初始化表头列宽拖动手柄 */
+  ngAfterViewInit(): void {
+    this.setupColumnResize();
+  }
+
+  /** 为表头每个th（最后一列除外）添加拖动手柄 */
+  private setupColumnResize(): void {
+    setTimeout(() => {
+      const tableEl = this.el.nativeElement.querySelector('nz-table');
+      if (!tableEl) return;
+      const ths = tableEl.querySelectorAll('.ant-table-thead th');
+      const cols = tableEl.querySelectorAll('colgroup col');
+      ths.forEach((th: HTMLElement, index: number) => {
+        if (index >= ths.length - 1) return;
+        const col = cols[index] as HTMLElement;
+        if (!col) return;
+        const handle = this.renderer.createElement('span');
+        this.renderer.addClass(handle, 'col-resize-handle');
+        this.renderer.appendChild(th, handle);
+        this.renderer.listen(handle, 'mousedown', (e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const startX = e.clientX;
+          const startWidth = th.offsetWidth;
+          const onMouseMove = (ev: MouseEvent) => {
+            const newWidth = Math.max(50, startWidth + ev.clientX - startX) + 'px';
+            this.renderer.setStyle(col, 'width', newWidth);
+            this.renderer.setStyle(col, 'min-width', newWidth);
+          };
+          const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          };
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    });
+  }
+
   /** 按编号排序函数 */
   sortByNo = (a: PetDto, b: PetDto) => a.no - b.no;
 
@@ -83,7 +124,7 @@ export class PetComponent implements OnInit {
   /** 按创建时间排序函数 */
   sortByCreationTime = (a: PetDto, b: PetDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
 
-  constructor(public readonly list: ListService, private petService: PetService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService) {}
+  constructor(public readonly list: ListService, private petService: PetService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService, private message: NzMessageService, private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
     this.currentUserId = this.configState.getDeep('currentUser.id') || '';
@@ -163,7 +204,14 @@ export class PetComponent implements OnInit {
   delete(id: string) {
     this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
       if (status === Confirmation.Status.confirm) {
-        this.petService.delete(id).subscribe(() => this.list.get());
+        this.petService.delete(id).subscribe({
+          next: () => this.list.get(),
+          error: (err: any) => {
+            if (err?.status === 403 || err?.error?.error?.code === 'Volo.Authorization') {
+              this.message.warning('您没有该记录的删除权限');
+            }
+          },
+        });
       }
     });
   }
@@ -188,10 +236,17 @@ export class PetComponent implements OnInit {
       ? this.petService.update(this.selectedPet.id, this.form.value)
       : this.petService.create(this.form.value);
 
-    request.subscribe(() => {
-      this.isModalOpen = false;
-      this.form.reset();
-      this.list.get();
+    request.subscribe({
+      next: () => {
+        this.isModalOpen = false;
+        this.form.reset();
+        this.list.get();
+      },
+      error: (err: any) => {
+        if (err?.status === 403 || err?.error?.error?.code === 'Volo.Authorization') {
+          this.message.warning('您没有该记录的编辑权限');
+        }
+      },
     });
   }
 

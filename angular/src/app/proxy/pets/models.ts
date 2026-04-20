@@ -32,6 +32,10 @@ export interface PetDto extends EntityDto<string> {
   lastModificationTime?: string;
   /** 最后修改人名称 */
   lastModifierName?: string;
+  /** 当前用户是否可编辑该记录 */
+  canEdit?: boolean;
+  /** 当前用户是否可删除该记录 */
+  canDelete?: boolean;
 }
 
 /** 会员下拉选项DTO（用于宠物表单选择主人） */

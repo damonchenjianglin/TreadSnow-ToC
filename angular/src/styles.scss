@@ -26,17 +26,52 @@
   border: none;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead>tr>th {
   border-bottom: none;
 }
 
-.ant-table-tbody > tr > td {
+.ant-table-tbody>tr>td {
   border-bottom: 1px solid #f0f0f0;
 }
 
 /* 表格行 hover 深灰色背景 */
-.ant-table-tbody > tr:hover > td {
+.ant-table-tbody>tr:hover>td {
   background-color: #e6e9f0 !important;
+}
+
+/* 表格单元格文本溢出隐藏 */
+.cell-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* 表头单元格需要相对定位，以便拖动手柄绝对定位 */
+.ant-table-thead>tr>th {
+  position: relative;
+}
+
+/* 禁用排序列::after伪元素的鼠标事件，避免遮挡拖动手柄 */
+.ant-table-column-sorters::after {
+  pointer-events: none;
+}
+
+/* 列宽拖动手柄：直接挂在th上，覆盖右侧全高 */
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 11;
+  user-select: none;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle:active {
+  background-color: rgba(24, 144, 255, 0.3);
 }
 
 /* nz-modal 圆角（content + header + footer 全覆盖） */
@@ -114,4 +149,17 @@
     height: 20px;
     background-image: url('/assets/images/getting-started/x.svg');
   }
+}
+
+/* ABP自带页面（登录、注册、设置等）输入框背景改为白色 */
+.form-control,
+.form-select {
+  background-color: #fff !important;
+}
+
+.form-control:hover,
+.form-control:focus,
+.form-select:hover,
+.form-select:focus {
+  background-color: #fff !important;
 }

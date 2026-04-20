@@ -36,7 +36,7 @@ namespace TreadSnow.Accounts
         /// <summary>
         /// OpenId
         /// </summary>
-        public string OpenId { get; set; }
+        public string? OpenId { get; set; }
 
         /// <summary>
         /// 描述
@@ -92,5 +92,15 @@ namespace TreadSnow.Accounts
         /// 最后修改人名称（关联查询）
         /// </summary>
         public string? LastModifierName { get; set; }
+
+        /// <summary>
+        /// 当前用户是否可编辑该记录（数据权限判断）
+        /// </summary>
+        public bool CanEdit { get; set; }
+
+        /// <summary>
+        /// 当前用户是否可删除该记录（数据权限判断）
+        /// </summary>
+        public bool CanDelete { get; set; }
     }
 }

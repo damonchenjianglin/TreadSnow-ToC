@@ -36,6 +36,10 @@ export interface AccountDto extends EntityDto<string> {
   lastModificationTime?: string;
   /** 最后修改人名称 */
   lastModifierName?: string;
+  /** 当前用户是否可编辑该记录 */
+  canEdit?: boolean;
+  /** 当前用户是否可删除该记录 */
+  canDelete?: boolean;
 }
 
 /** 创建会员DTO */

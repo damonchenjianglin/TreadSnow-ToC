@@ -1,0 +1,27 @@
+{
+  "departments": {
+    "总公司": "d7ec0d5d-e755-7a32-dfc1-3a20b70e604b",
+    "销售部": "9dc126b6-2f06-cddd-951d-3a20b70e6117",
+    "销售一组": "3297bbfa-09db-5215-a2ec-3a20b70e61ec",
+    "销售二组": "f90e8ad2-232f-fe39-48aa-3a20b70e62c2",
+    "技术部": "5450f928-52fc-d632-ba37-3a20b70e637e"
+  },
+  "roles": {
+    "销售经理": "b6ce3054-9cc4-372a-75b3-3a20b70e646b",
+    "销售员工": "9a04aa7e-903b-fb90-8845-3a20b70e65a2",
+    "技术经理": "6b0a57e1-5195-9ea0-a8a4-3a20b70e668f",
+    "技术员工": "611dc796-7c28-7004-58c6-3a20b70e6768"
+  },
+  "users": {
+    "sales_mgr_zhang": "12be170b-d455-ec6d-d33a-3a20b70e6f8c",
+    "sales_staff_li": "f3d1415d-39b7-dcf8-42b8-3a20b70e712a",
+    "sales_staff_wang": "b5e37973-c1b6-6aa0-3e5c-3a20b70e726f",
+    "tech_mgr_chen": "fa8e432b-e457-7a1a-9f25-3a20b70e73aa",
+    "tech_staff_zhao": "f53c17b6-d685-6c8e-d074-3a20b70e74e6"
+  },
+  "teams": {
+    "销售A队": "a6f7175b-be4a-163c-2cf5-3a20b70e7621",
+    "销售B队": "a39b7647-1e87-9ca5-9f5a-3a20b70e76e2",
+    "技术支持组": "33f0e4d7-774b-939b-91c9-3a20b70e7843"
+  }
+}

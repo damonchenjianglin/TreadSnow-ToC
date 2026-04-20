@@ -12,34 +12,22 @@
     <tr *ngFor="let config of configs; let i = index">
       <td>{{ entityList[i].labelKey | abpLocalization }}</td>
       <td nzAlign="center">
-        <button
-          nz-button nzShape="circle" nzSize="small" class="level-btn"
+        <span class="level-btn"
           [style.background-color]="getLevelColor(config.readLevel)"
-          [style.border-color]="getLevelColor(config.readLevel)"
-          [style.color]="config.readLevel === 0 ? '#999' : '#fff'"
           (click)="cycleLevel(config, 'readLevel')">
-          {{ config.readLevel }}
-        </button>
+        </span>
       </td>
       <td nzAlign="center">
-        <button
-          nz-button nzShape="circle" nzSize="small" class="level-btn"
+        <span class="level-btn"
           [style.background-color]="getLevelColor(config.writeLevel)"
-          [style.border-color]="getLevelColor(config.writeLevel)"
-          [style.color]="config.writeLevel === 0 ? '#999' : '#fff'"
           (click)="cycleLevel(config, 'writeLevel')">
-          {{ config.writeLevel }}
-        </button>
+        </span>
       </td>
       <td nzAlign="center">
-        <button
-          nz-button nzShape="circle" nzSize="small" class="level-btn"
+        <span class="level-btn"
           [style.background-color]="getLevelColor(config.deleteLevel)"
-          [style.border-color]="getLevelColor(config.deleteLevel)"
-          [style.color]="config.deleteLevel === 0 ? '#999' : '#fff'"
           (click)="cycleLevel(config, 'deleteLevel')">
-          {{ config.deleteLevel }}
-        </button>
+        </span>
       </td>
     </tr>
   </tbody>
