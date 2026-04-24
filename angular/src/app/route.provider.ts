@@ -28,6 +28,13 @@ export const APP_ROUTE_PROVIDER = [
         requiredPolicy: 'TreadSnow.Pets',
       },
       {
+        path: '/opportunities',
+        name: '::Menu:Opportunities',
+        iconClass: 'fas fa-lightbulb',
+        layout: eLayoutType.application,
+        requiredPolicy: 'TreadSnow.Opportunities',
+      },
+      {
         path: '/upload-files',
         name: '::Menu:UploadFiles',
         iconClass: 'fas fa-file-upload',

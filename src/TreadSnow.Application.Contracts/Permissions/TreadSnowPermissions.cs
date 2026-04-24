@@ -61,6 +61,17 @@ public static class TreadSnowPermissions
     }
 
     /// <summary>
+    /// 商机权限
+    /// </summary>
+    public static class Opportunities
+    {
+        public const string Default = GroupName + ".Opportunities";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+    }
+
+    /// <summary>
     /// 数据权限配置权限
     /// </summary>
     public static class DataPermissions

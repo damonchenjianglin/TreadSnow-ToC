@@ -42,7 +42,23 @@
       "Bash(taskkill //F //IM chrome.exe)",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_run_code",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet watch *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /PID 39456 /F)",
+      "Bash(cmd.exe //C \"taskkill /PID 39456 /F\")",
+      "Bash(taskkill //F //IM dotnet.exe)",
+      "WebSearch",
+      "WebFetch(domain:www.nuget.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(dotnet sln *)",
+      "Bash(curl -s -u elastic:xiaoxiaoxi11 \"http://139.9.83.8:9200/_cluster/health?pretty\" --connect-timeout 10)",
+      "Bash(curl -s -k \"https://localhost:44312/api/abp/application-configuration\" --connect-timeout 10)",
+      "Bash(curl -s -k \"https://localhost:44312/health-status\" --connect-timeout 5)",
+      "Bash(curl -s -u elastic:xiaoxiaoxi11 \"http://139.9.83.8:9200/_data_stream/logs-treadsnow-default?pretty\")",
+      "Bash(curl -s -u elastic:xiaoxiaoxi11 \"http://139.9.83.8:9200/logs-treadsnow-default/_search?pretty&size=3&sort=@timestamp:desc\")"
     ]
   }
 }

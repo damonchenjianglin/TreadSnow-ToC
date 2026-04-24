@@ -39,7 +39,9 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
+using Volo.Abp.Application.Dtos;
 using Volo.Abp.MailKit;
+using TreadSnow.Elasticsearch.Logging;
 
 namespace TreadSnow;
 
@@ -54,7 +56,8 @@ namespace TreadSnow;
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpMailKitModule)
+    typeof(AbpMailKitModule),
+    typeof(TreadSnowElasticsearchLoggingModule)
     )]
 public class TreadSnowHttpApiHostModule : AbpModule
 {
@@ -92,6 +95,10 @@ public class TreadSnowHttpApiHostModule : AbpModule
     {
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
+
+        /* 提高分页查询最大条数限制，支持导出功能一次获取更多数据 */
+        LimitedResultRequestDto.MaxMaxResultCount = 10000;
+        ExtensibleLimitedResultRequestDto.MaxMaxResultCount = 10000;
 
         if (!configuration.GetValue<bool>("App:DisablePII"))
         {

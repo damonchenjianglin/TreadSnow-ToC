@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,6 +91,26 @@ namespace TreadSnow.Accounts
                 query = query.Where(x => x.OwnerId == input.OwnerId.Value);
             }
 
+            if (input.StartCreationTime.HasValue)
+            {
+                query = query.Where(x => x.CreationTime >= input.StartCreationTime.Value);
+            }
+
+            if (input.EndCreationTime.HasValue)
+            {
+                query = query.Where(x => x.CreationTime < input.EndCreationTime.Value.AddDays(1));
+            }
+
+            if (input.StartLastModificationTime.HasValue)
+            {
+                query = query.Where(x => x.LastModificationTime >= input.StartLastModificationTime.Value);
+            }
+
+            if (input.EndLastModificationTime.HasValue)
+            {
+                query = query.Where(x => x.LastModificationTime < input.EndLastModificationTime.Value.AddDays(1));
+            }
+
             query = await _dataPermissionService.ApplyReadFilterAsync(query, "account", x => x.OwnerId, x => x.OwnerTeamId);
 
             var totalCount = query.Count();
@@ -137,6 +158,7 @@ namespace TreadSnow.Accounts
             account.TenantId = CurrentTenant.Id;
             account.OwnerId = input.OwnerId ?? CurrentUser.Id;
             await _repository.InsertAsync(account);
+            Logger.LogInformation("客户创建成功 AccountId:{AccountId} Name:{Name} Phone:{Phone}", account.Id, account.Name, account.Phone);
             return ObjectMapper.Map<Account, AccountDto>(account);
         }
 

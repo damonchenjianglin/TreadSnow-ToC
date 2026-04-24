@@ -1,4 +1,5 @@
 import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
+import { fetchAllPaged, exportToXlsx } from '../shared/export-xlsx';
 import { Component, OnInit, AfterViewInit, ElementRef, Renderer2 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
@@ -262,13 +263,27 @@ export class UploadFileComponent implements OnInit, AfterViewInit {
     this.list.get();
   }
 
-  /** 导出当前条件数据 */
-  exportCurrent() {
-    console.warn('导出当前条件数据，搜索关键词:', this.searchText);
+  /** 导出当前条件数据（分页批量拉取） */
+  async exportCurrent() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<UploadFileDto>((skip, take) => this.uploadFileService.getList({ skipCount: skip, maxResultCount: take, ownerId: this.ownerFilter || undefined } as any));
+      const rows = data.map((d) => ({ '文件名': d.name ?? '', '实体名称': d.entityName ?? '', '记录ID': d.recordId ?? '', '文件类型': d.type ?? '', '文件路径': d.path ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
+      exportToXlsx(rows, '附件_当前条件');
+    } finally {
+      this.loading = false;
+    }
   }
 
-  /** 导出所有数据 */
-  exportAll() {
-    console.warn('导出所有数据');
+  /** 导出所有数据（分页批量拉取） */
+  async exportAll() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<UploadFileDto>((skip, take) => this.uploadFileService.getList({ skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '文件名': d.name ?? '', '实体名称': d.entityName ?? '', '记录ID': d.recordId ?? '', '文件类型': d.type ?? '', '文件路径': d.path ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
+      exportToXlsx(rows, '附件_全部');
+    } finally {
+      this.loading = false;
+    }
   }
 }

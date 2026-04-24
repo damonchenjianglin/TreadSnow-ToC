@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using TreadSnow.Elasticsearch.Logging.Extensions;
 
 namespace TreadSnow;
 
@@ -27,13 +28,14 @@ public class Program
                         .UseSerilog((context, services, loggerConfiguration) =>
                         {
                             loggerConfiguration
-                                .MinimumLevel.Warning() // 只记录警告和错误
+                                .MinimumLevel.Warning()
                                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                                 .Enrich.FromLogContext()
                                 .WriteTo.Async(c => c.File("Logs/logs.txt"))
                                 .WriteTo.Async(c => c.Console())
-                                .WriteTo.Async(c => c.AbpStudio(services));
+                                .WriteTo.Async(c => c.AbpStudio(services))
+                                .WriteToElasticsearch(context.Configuration, services);
                         });
             await builder.AddApplicationAsync<TreadSnowHttpApiHostModule>();
             var app = builder.Build();

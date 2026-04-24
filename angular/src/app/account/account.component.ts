@@ -1,5 +1,5 @@
 import { ConfigStateService, ListService, PagedResultDto } from '@abp/ng.core';
-import * as XLSX from 'xlsx';
+import { exportToXlsx } from '../shared/export-xlsx';
 import { Component, OnInit, AfterViewInit, ElementRef, Renderer2 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
@@ -56,6 +56,30 @@ export class AccountComponent implements OnInit, AfterViewInit {
 
   /** 负责人筛选项列表（用于表格漏斗筛选） */
   ownerFilters: { text: string; value: string }[] = [];
+
+  /** 创建人筛选项列表 */
+  creatorFilters: { text: string; value: string }[] = [];
+
+  /** 创建人筛选函数（前端过滤） */
+  creatorFilterFn = (selectedValues: string[], item: AccountDto) => selectedValues.includes(item.creatorName ?? '');
+
+  /** 修改人筛选项列表 */
+  lastModifierFilters: { text: string; value: string }[] = [];
+
+  /** 修改人筛选函数（前端过滤） */
+  lastModifierFilterFn = (selectedValues: string[], item: AccountDto) => selectedValues.includes(item.lastModifierName ?? '');
+
+  /** 创建时间范围筛选值 */
+  creationTimeRange: Date[] | null = null;
+
+  /** 创建时间筛选弹出框是否可见 */
+  creationTimeFilterVisible = false;
+
+  /** 修改时间范围筛选值 */
+  lastModificationTimeRange: Date[] | null = null;
+
+  /** 修改时间筛选弹出框是否可见 */
+  lastModificationTimeFilterVisible = false;
 
   /** 初始化表头列宽拖动手柄（动态插入到每个th的直接子级，避免被sorter包裹） */
   ngAfterViewInit(): void {
@@ -124,6 +148,15 @@ export class AccountComponent implements OnInit, AfterViewInit {
   /** 按创建时间排序函数 */
   sortByCreationTime = (a: AccountDto, b: AccountDto) => (a.creationTime ?? '').localeCompare(b.creationTime ?? '');
 
+  /** 按创建人排序函数 */
+  sortByCreatorName = (a: AccountDto, b: AccountDto) => (a.creatorName ?? '').localeCompare(b.creatorName ?? '');
+
+  /** 按修改人排序函数 */
+  sortByLastModifierName = (a: AccountDto, b: AccountDto) => (a.lastModifierName ?? '').localeCompare(b.lastModifierName ?? '');
+
+  /** 按修改时间排序函数 */
+  sortByLastModificationTime = (a: AccountDto, b: AccountDto) => (a.lastModificationTime ?? '').localeCompare(b.lastModificationTime ?? '');
+
   constructor(public readonly list: ListService, private accountService: AccountService, private fb: FormBuilder, private confirmation: ConfirmationService, private configState: ConfigStateService, private message: NzMessageService, private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
@@ -131,7 +164,7 @@ export class AccountComponent implements OnInit, AfterViewInit {
 
     /** 定义数据查询流，传入name模糊筛选和负责人筛选 */
     const accountStreamCreator = (query: any) =>
-      this.accountService.getList({ ...query, name: this.nameFilter || undefined, ownerId: this.ownerFilter || undefined });
+      this.accountService.getList({ ...query, name: this.nameFilter || undefined, ownerId: this.ownerFilter || undefined, startCreationTime: this.creationTimeRange?.[0]?.toISOString() || undefined, endCreationTime: this.creationTimeRange?.[1]?.toISOString() || undefined, startLastModificationTime: this.lastModificationTimeRange?.[0]?.toISOString() || undefined, endLastModificationTime: this.lastModificationTimeRange?.[1]?.toISOString() || undefined });
 
     this.list.hookToQuery(accountStreamCreator).subscribe((response) => {
       this.account = response;
@@ -146,6 +179,8 @@ export class AccountComponent implements OnInit, AfterViewInit {
     this.accountService.getOwnerLookup().subscribe((res) => {
       this.owners = res.items ?? [];
       this.ownerFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.id ?? '' }));
+      this.creatorFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.name ?? '' }));
+      this.lastModifierFilters = this.owners.map((o) => ({ text: o.name ?? '', value: o.name ?? '' }));
     });
     this.accountService.getTeamLookup().subscribe((res) => {
       this.teams = res.items ?? [];
@@ -171,6 +206,32 @@ export class AccountComponent implements OnInit, AfterViewInit {
    */
   onOwnerFilterChange(selectedValues: string[]) {
     this.ownerFilter = selectedValues.length > 0 ? selectedValues[0] : null;
+    this.list.get();
+  }
+
+  /** 创建时间筛选确定 */
+  onCreationTimeFilterSearch() {
+    this.creationTimeFilterVisible = false;
+    this.list.get();
+  }
+
+  /** 创建时间筛选重置 */
+  onCreationTimeFilterReset() {
+    this.creationTimeRange = null;
+    this.creationTimeFilterVisible = false;
+    this.list.get();
+  }
+
+  /** 修改时间筛选确定 */
+  onLastModificationTimeFilterSearch() {
+    this.lastModificationTimeFilterVisible = false;
+    this.list.get();
+  }
+
+  /** 修改时间筛选重置 */
+  onLastModificationTimeFilterReset() {
+    this.lastModificationTimeRange = null;
+    this.lastModificationTimeFilterVisible = false;
     this.list.get();
   }
 
@@ -273,34 +334,19 @@ export class AccountComponent implements OnInit, AfterViewInit {
     this.list.maxResultCount = size;
   }
 
-  /**
-   * 导出当前条件数据（调后端不分页接口，传当前筛选条件，导出全部匹配数据）
-   */
+  /** 导出当前条件数据（调后端不分页接口，传当前筛选条件，导出全部匹配数据） */
   exportCurrent() {
     this.accountService.getAllList(this.nameFilter || undefined).subscribe((data) => {
-      this.downloadXlsx(data, '会员_当前条件');
+      const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '手机号码': d.phone ?? '', '邮箱': d.email ?? '', 'OpenId': d.openId ?? '', '描述': d.description ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
+      exportToXlsx(rows, '会员_当前条件');
     });
   }
 
-  /**
-   * 导出所有数据（不传任何筛选条件）
-   */
+  /** 导出所有数据（不传任何筛选条件） */
   exportAll() {
     this.accountService.getAllList().subscribe((data) => {
-      this.downloadXlsx(data, '会员_全部');
+      const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '手机号码': d.phone ?? '', '邮箱': d.email ?? '', 'OpenId': d.openId ?? '', '描述': d.description ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
+      exportToXlsx(rows, '会员_全部');
     });
-  }
-
-  /**
-   * 将数据导出为xlsx文件并下载
-   * @param data 导出数据
-   * @param filename 文件名前缀
-   */
-  private downloadXlsx(data: AccountDto[], filename: string) {
-    const rows = data.map((d) => ({ '编号': d.no, '名称': d.name ?? '', '手机号码': d.phone ?? '', '邮箱': d.email ?? '', 'OpenId': d.openId ?? '', '描述': d.description ?? '', '负责人': d.ownerName ?? '', '负责团队': d.ownerTeamName ?? '' }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '会员');
-    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 }

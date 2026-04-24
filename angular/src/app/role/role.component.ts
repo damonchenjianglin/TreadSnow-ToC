@@ -6,7 +6,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DataPermissionModalComponent } from './data-permission-modal/data-permission-modal.component';
 import { MenuPermissionComponent } from './menu-permission/menu-permission.component';
-import * as XLSX from 'xlsx';
+import { fetchAllPaged, exportToXlsx } from '../shared/export-xlsx';
 
 /** 角色列表组件 */
 @Component({
@@ -201,26 +201,27 @@ export class RoleComponent implements OnInit {
     this.list.maxResultCount = size;
   }
 
-  /** 导出当前条件数据 */
-  exportCurrent() {
-    this.roleService.getList({ filter: this.nameFilter || undefined, maxResultCount: 10000 } as any).subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '角色_当前条件');
-    });
+  /** 导出当前条件数据（分页批量拉取） */
+  async exportCurrent() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<IdentityRoleDto>((skip, take) => this.roleService.getList({ filter: this.nameFilter || undefined, skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '角色名称': d.name ?? '', '默认': d.isDefault ? '是' : '否', '公开': d.isPublic ? '是' : '否', '静态': d.isStatic ? '是' : '否' }));
+      exportToXlsx(rows, '角色_当前条件');
+    } finally {
+      this.loading = false;
+    }
   }
 
-  /** 导出所有数据 */
-  exportAll() {
-    this.roleService.getAllList().subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '角色_全部');
-    });
-  }
-
-  /** 下载xlsx文件 */
-  private downloadXlsx(data: IdentityRoleDto[], filename: string) {
-    const rows = data.map((d) => ({ '角色名称': d.name ?? '', '默认': d.isDefault ? '是' : '否', '公开': d.isPublic ? '是' : '否', '静态': d.isStatic ? '是' : '否' }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '角色');
-    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  /** 导出所有数据（分页批量拉取） */
+  async exportAll() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<IdentityRoleDto>((skip, take) => this.roleService.getList({ skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '角色名称': d.name ?? '', '默认': d.isDefault ? '是' : '否', '公开': d.isPublic ? '是' : '否', '静态': d.isStatic ? '是' : '否' }));
+      exportToXlsx(rows, '角色_全部');
+    } finally {
+      this.loading = false;
+    }
   }
 }

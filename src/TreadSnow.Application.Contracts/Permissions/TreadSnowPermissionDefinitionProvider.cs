@@ -36,6 +36,11 @@ public class TreadSnowPermissionDefinitionProvider : PermissionDefinitionProvide
         teamsPermission.AddChild(TreadSnowPermissions.Teams.Edit, L("Permission:Teams.Edit"));
         teamsPermission.AddChild(TreadSnowPermissions.Teams.Delete, L("Permission:Teams.Delete"));
 
+        var opportunitiesPermission = myGroup.AddPermission(TreadSnowPermissions.Opportunities.Default, L("Permission:Opportunities"));
+        opportunitiesPermission.AddChild(TreadSnowPermissions.Opportunities.Create, L("Permission:Opportunities.Create"));
+        opportunitiesPermission.AddChild(TreadSnowPermissions.Opportunities.Edit, L("Permission:Opportunities.Edit"));
+        opportunitiesPermission.AddChild(TreadSnowPermissions.Opportunities.Delete, L("Permission:Opportunities.Delete"));
+
         var dataPermissionsPermission = myGroup.AddPermission(TreadSnowPermissions.DataPermissions.Default, L("Permission:DataPermissions"));
         dataPermissionsPermission.AddChild(TreadSnowPermissions.DataPermissions.Manage, L("Permission:DataPermissions.Manage"));
     }

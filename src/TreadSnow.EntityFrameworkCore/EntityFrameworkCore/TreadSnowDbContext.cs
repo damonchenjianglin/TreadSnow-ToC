@@ -17,6 +17,7 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using TreadSnow.Accounts;
 using TreadSnow.DataPermissions;
 using TreadSnow.Departments;
+using TreadSnow.Opportunities;
 using TreadSnow.Pets;
 using TreadSnow.Teams;
 using TreadSnow.UploadFiles;
@@ -42,6 +43,7 @@ public class TreadSnowDbContext :
     public DbSet<TeamRole> TeamRoles { get; set; }
     public DbSet<TeamUser> TeamUsers { get; set; }
     public DbSet<RoleDataPermission> RoleDataPermissions { get; set; }
+    public DbSet<Opportunity> Opportunities { get; set; }
 
     #endregion 
 
@@ -181,6 +183,18 @@ public class TreadSnowDbContext :
             b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId);
             b.HasOne<IdentityRole>().WithMany().HasForeignKey(x => x.RoleId).IsRequired();
             b.Property(x => x.ConfigJson).IsRequired();
+        });
+
+        //商机表
+        builder.Entity<Opportunity>(b =>
+        {
+            b.ToTable(TreadSnowConsts.DbTablePrefix + "Opportunities", TreadSnowConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId); //租户id
+            b.Property(x => x.No).UseIdentityColumn(1000, 1); //编号
+            b.Property(x => x.Name).IsRequired().HasMaxLength(128); //名称
+            b.HasOne<Account>().WithMany().HasForeignKey(x => x.AccountId).IsRequired(); //客户
+            b.Property(x => x.Description).HasMaxLength(1000); //描述
         });
         #endregion
     }

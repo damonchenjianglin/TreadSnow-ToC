@@ -5,7 +5,7 @@ import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import * as XLSX from 'xlsx';
+import { fetchAllPaged, exportToXlsx } from '../shared/export-xlsx';
 import { DepartmentService, DepartmentDto } from '../proxy/departments';
 
 /** 用户管理列表组件 */
@@ -230,18 +230,28 @@ export class UserComponent implements OnInit {
     this.list.maxResultCount = size;
   }
 
-  /** 导出当前条件数据 */
-  exportCurrent() {
-    this.userService.getList({ filter: this.userNameFilter || undefined, maxResultCount: 10000 } as any).subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '用户_当前条件');
-    });
+  /** 导出当前条件数据（分页批量拉取） */
+  async exportCurrent() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<IdentityUserDto>((skip, take) => this.userService.getList({ filter: this.userNameFilter || undefined, skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '用户名': d.userName ?? '', '部门': this.getDepartmentName((d as any).extraProperties?.DepartmentId), '邮箱': d.email ?? '', '手机号码': d.phoneNumber ?? '', 'OpenId': (d as any).extraProperties?.OpenId ?? '', '启用': d.isActive ? '是' : '否' }));
+      exportToXlsx(rows, '用户_当前条件');
+    } finally {
+      this.loading = false;
+    }
   }
 
-  /** 导出所有数据 */
-  exportAll() {
-    this.userService.getList({ maxResultCount: 10000 } as any).subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '用户_全部');
-    });
+  /** 导出所有数据（分页批量拉取） */
+  async exportAll() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<IdentityUserDto>((skip, take) => this.userService.getList({ skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '用户名': d.userName ?? '', '部门': this.getDepartmentName((d as any).extraProperties?.DepartmentId), '邮箱': d.email ?? '', '手机号码': d.phoneNumber ?? '', 'OpenId': (d as any).extraProperties?.OpenId ?? '', '启用': d.isActive ? '是' : '否' }));
+      exportToXlsx(rows, '用户_全部');
+    } finally {
+      this.loading = false;
+    }
   }
 
   /**
@@ -253,21 +263,5 @@ export class UserComponent implements OnInit {
     if (!departmentId) return '';
     const dept = this.departments.find((d) => d.id === departmentId);
     return dept?.name ?? '';
-  }
-
-  /** 下载xlsx文件 */
-  private downloadXlsx(data: IdentityUserDto[], filename: string) {
-    const rows = data.map((d) => ({
-      '用户名': d.userName ?? '',
-      '部门': this.getDepartmentName((d as any).extraProperties?.DepartmentId),
-      '邮箱': d.email ?? '',
-      '手机号码': d.phoneNumber ?? '',
-      'OpenId': (d as any).extraProperties?.OpenId ?? '',
-      '启用': d.isActive ? '是' : '否',
-    }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '用户');
-    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 }

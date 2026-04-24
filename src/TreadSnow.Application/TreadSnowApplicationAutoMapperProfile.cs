@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TreadSnow.Accounts;
 using TreadSnow.Departments;
 using TreadSnow.Lookups;
+using TreadSnow.Opportunities;
 using TreadSnow.Pets;
 using TreadSnow.Teams;
 using TreadSnow.UploadFiles;
@@ -23,7 +24,7 @@ public class TreadSnowApplicationAutoMapperProfile : Profile
         CreateMap<Pet, PetDto>();
         CreateMap<CreatePetDto, Pet>();
         CreateMap<UpdatePetDto, Pet>();
-        CreateMap<Account, AccountLookupDto>();
+        CreateMap<Account, Pets.AccountLookupDto>();
 
         // 附件
         CreateMap<UploadFile, UploadFileDto>();
@@ -39,6 +40,12 @@ public class TreadSnowApplicationAutoMapperProfile : Profile
         CreateMap<Team, TeamDto>();
         CreateMap<CreateTeamDto, Team>();
         CreateMap<UpdateTeamDto, Team>();
+
+        // 商机
+        CreateMap<Opportunity, OpportunityDto>();
+        CreateMap<CreateOpportunityDto, Opportunity>();
+        CreateMap<UpdateOpportunityDto, Opportunity>();
+        CreateMap<Account, Opportunities.AccountLookupDto>();
 
         // 下拉列表
         CreateMap<IdentityUser, UserLookupDto>()

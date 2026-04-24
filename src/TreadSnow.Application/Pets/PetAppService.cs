@@ -111,6 +111,26 @@ namespace TreadSnow.Pets
                 query = query.Where(x => x.OwnerId == input.OwnerId.Value);
             }
 
+            if (input.StartCreationTime.HasValue)
+            {
+                query = query.Where(x => x.CreationTime >= input.StartCreationTime.Value);
+            }
+
+            if (input.EndCreationTime.HasValue)
+            {
+                query = query.Where(x => x.CreationTime < input.EndCreationTime.Value.AddDays(1));
+            }
+
+            if (input.StartLastModificationTime.HasValue)
+            {
+                query = query.Where(x => x.LastModificationTime >= input.StartLastModificationTime.Value);
+            }
+
+            if (input.EndLastModificationTime.HasValue)
+            {
+                query = query.Where(x => x.LastModificationTime < input.EndLastModificationTime.Value.AddDays(1));
+            }
+
             query = await _dataPermissionService.ApplyReadFilterAsync(query, "pet", x => x.OwnerId, x => x.OwnerTeamId);
 
             var totalCount = await _asyncExecuter.CountAsync(query);

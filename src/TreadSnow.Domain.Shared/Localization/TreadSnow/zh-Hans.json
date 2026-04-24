@@ -104,6 +104,10 @@
         "Permission:Teams.Edit": "编辑团队",
         "Permission:Teams.Delete": "删除团队",
 
+        "Menu:Opportunities": "商机管理",
+        "NewOpportunity": "新增商机",
+        "Opportunity:AccountId": "客户",
+
         "Permission:DataPermissions": "数据权限",
         "Permission:DataPermissions.Manage": "管理数据权限",
         "DataPermission": "数据权限",

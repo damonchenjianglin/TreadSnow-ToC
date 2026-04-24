@@ -42,6 +42,7 @@
     <ProjectReference Include="..\TreadSnow.Application\TreadSnow.Application.csproj" />
     <ProjectReference Include="..\TreadSnow.HttpApi\TreadSnow.HttpApi.csproj" />
     <ProjectReference Include="..\TreadSnow.EntityFrameworkCore\TreadSnow.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\TreadSnow.Elasticsearch.Logging\TreadSnow.Elasticsearch.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

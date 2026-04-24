@@ -23,6 +23,7 @@ const routes: Routes = [
   { path: 'accounts', loadChildren: () => import('./account/account.module').then(m => m.AccountModule) },
   { path: 'pets', loadChildren: () => import('./pet/pet.module').then(m => m.PetModule) },
   { path: 'upload-files', loadChildren: () => import('./upload-file/upload-file.module').then(m => m.UploadFileModule) },
+  { path: 'opportunities', loadChildren: () => import('./opportunity/opportunity.module').then(m => m.OpportunityModule) },
   { path: 'departments', loadChildren: () => import('./department/department.module').then(m => m.DepartmentModule) },
   { path: 'teams', loadChildren: () => import('./team/team.module').then(m => m.TeamModule) },
 ];

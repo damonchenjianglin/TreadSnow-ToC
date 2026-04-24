@@ -4,7 +4,7 @@ import { TenantDto } from '@abp/ng.tenant-management/proxy';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import * as XLSX from 'xlsx';
+import { fetchAllPaged, exportToXlsx } from '../shared/export-xlsx';
 
 /** 租户管理列表组件 */
 @Component({
@@ -156,26 +156,27 @@ export class TenantComponent implements OnInit {
     this.list.maxResultCount = size;
   }
 
-  /** 导出当前条件数据 */
-  exportCurrent() {
-    this.tenantService.getList({ filter: this.nameFilter || undefined, maxResultCount: 10000 } as any).subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '租户_当前条件');
-    });
+  /** 导出当前条件数据（分页批量拉取） */
+  async exportCurrent() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<TenantDto>((skip, take) => this.tenantService.getList({ filter: this.nameFilter || undefined, skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '租户名称': d.name ?? '' }));
+      exportToXlsx(rows, '租户_当前条件');
+    } finally {
+      this.loading = false;
+    }
   }
 
-  /** 导出所有数据 */
-  exportAll() {
-    this.tenantService.getList({ maxResultCount: 10000 } as any).subscribe((res) => {
-      this.downloadXlsx(res.items ?? [], '租户_全部');
-    });
-  }
-
-  /** 下载xlsx文件 */
-  private downloadXlsx(data: TenantDto[], filename: string) {
-    const rows = data.map((d) => ({ '租户名称': d.name ?? '' }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '租户');
-    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  /** 导出所有数据（分页批量拉取） */
+  async exportAll() {
+    this.loading = true;
+    try {
+      const data = await fetchAllPaged<TenantDto>((skip, take) => this.tenantService.getList({ skipCount: skip, maxResultCount: take } as any));
+      const rows = data.map((d) => ({ '租户名称': d.name ?? '' }));
+      exportToXlsx(rows, '租户_全部');
+    } finally {
+      this.loading = false;
+    }
   }
 }

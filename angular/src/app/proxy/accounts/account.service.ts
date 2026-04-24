@@ -52,11 +52,11 @@ export class AccountService {
    * @param input 分页排序参数（含可选name和ownerId）
    * @returns 会员分页结果
    */
-  getList = (input: PagedAndSortedResultRequestDto & { name?: string; ownerId?: string }) =>
+  getList = (input: PagedAndSortedResultRequestDto & { name?: string; ownerId?: string; startCreationTime?: string; endCreationTime?: string; startLastModificationTime?: string; endLastModificationTime?: string }) =>
     this.restService.request<any, PagedResultDto<AccountDto>>({
       method: 'GET',
       url: '/api/app/account',
-      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount, name: input.name, ownerId: input.ownerId },
+      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount, name: input.name, ownerId: input.ownerId, startCreationTime: input.startCreationTime, endCreationTime: input.endCreationTime, startLastModificationTime: input.startLastModificationTime, endLastModificationTime: input.endLastModificationTime },
     }, { apiName: this.apiName });
 
   /**

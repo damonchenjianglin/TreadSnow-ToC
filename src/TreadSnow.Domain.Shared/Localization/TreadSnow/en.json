@@ -97,6 +97,14 @@
         "Permission:Teams.Edit": "Editing teams",
         "Permission:Teams.Delete": "Deleting teams",
 
+        "Menu:Opportunities": "Opportunities",
+        "NewOpportunity": "New opportunity",
+        "Opportunity:AccountId": "Customer",
+        "Permission:Opportunities": "Opportunity Management",
+        "Permission:Opportunities.Create": "Creating new opportunities",
+        "Permission:Opportunities.Edit": "Editing the opportunities",
+        "Permission:Opportunities.Delete": "Deleting the opportunities",
+
         "Permission:DataPermissions": "Data Permissions",
         "Permission:DataPermissions.Manage": "Managing data permissions",
         "DataPermission": "Data Permission",

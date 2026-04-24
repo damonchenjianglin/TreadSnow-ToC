@@ -15,6 +15,7 @@ const ENTITY_LIST = [
   { entityName: 'account', labelKey: '::Menu:Accounts' },
   { entityName: 'pet', labelKey: '::Menu:Pets' },
   { entityName: 'uploadFile', labelKey: '::Menu:UploadFiles' },
+  { entityName: 'opportunity', labelKey: '::Menu:Opportunities' },
 ];
 
 /**
