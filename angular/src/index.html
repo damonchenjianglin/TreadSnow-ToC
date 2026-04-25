@@ -9,5 +9,29 @@
   </head>
   <body>
     <app-root></app-root>
+    <script>
+      /**
+       * OAuth 回调修复：SSO 授权码回调后 ABP Angular bootstrap 可能失败导致白屏。
+       * 检测到授权码回调时，轮询 localStorage 中的 access_token，
+       * token 一就绪立即刷新页面，最大限度缩短空白时间。
+       */
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.has('code') && params.has('state')) {
+          var timer = setInterval(function() {
+            if (document.querySelector('router-outlet')) {
+              clearInterval(timer);
+              return;
+            }
+            var token = sessionStorage.getItem('access_token') || localStorage.getItem('access_token');
+            if (token) {
+              clearInterval(timer);
+              window.location.href = window.location.origin + window.location.pathname;
+            }
+          }, 200);
+          setTimeout(function() { clearInterval(timer); }, 10000);
+        }
+      })();
+    </script>
   </body>
 </html>

@@ -71,24 +71,11 @@ public class TreadSnowHttpApiHostModule : AbpModule
             builder.AddValidation(options =>
             {
                 options.AddAudiences("TreadSnow");
-                options.UseLocalServer();
+                options.SetIssuer(configuration["AuthServer:Authority"]!);
+                options.UseSystemNetHttp();
                 options.UseAspNetCore();
             });
         });
-
-        if (!hostingEnvironment.IsDevelopment())
-        {
-            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-            {
-                options.AddDevelopmentEncryptionAndSigningCertificate = false;
-            });
-
-            PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
-            {
-                serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
-                serverBuilder.SetIssuer(new Uri(configuration["AuthServer:Authority"]!));
-            });
-        }
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -106,18 +93,10 @@ public class TreadSnowHttpApiHostModule : AbpModule
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogCompleteSecurityArtifact = true;
         }
 
-        if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
+        Configure<ForwardedHeadersOptions>(options =>
         {
-            Configure<OpenIddictServerAspNetCoreOptions>(options =>
-            {
-                options.DisableTransportSecurityRequirement = true;
-            });
-            
-            Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
-            });
-        }
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+        });
 
         ConfigureAuthentication(context);
         ConfigureUrls(configuration);

@@ -3,7 +3,7 @@
 const baseUrl = 'http://localhost:4200';
 
 const oAuthConfig = {
-  issuer: 'https://localhost:44312/',
+  issuer: 'https://localhost:5000/',
   redirectUri: baseUrl,
   clientId: 'TreadSnow_App',
   responseType: 'code',
@@ -24,7 +24,7 @@ export const environment = {
       rootNamespace: 'TreadSnow',
     },
     AbpAccountPublic: {
-      url: oAuthConfig.issuer,
+      url: 'https://localhost:5000/',
       rootNamespace: 'AbpAccountPublic',
     },
   },
